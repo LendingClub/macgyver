@@ -27,24 +27,19 @@ public class A10ClientServiceFactory extends ServiceFactory<A10Client> {
 	}
 
 	@Override
-	protected A10ClientImpl doCreateInstance(ServiceDefinition def) {
+	protected A10Client doCreateInstance(ServiceDefinition def) {
 
-		A10ClientImpl c = new A10ClientImpl(def.getProperties().getProperty("url"), def
-				.getProperties().getProperty("username"), def.getProperties()
-				.getProperty("password"));
+		boolean certVerificationEnabled = Boolean.parseBoolean(def
+				.getProperties().getProperty(CERTIFICATE_VERIFICATION_ENABLED,
+						"false"));
 
-		try {
-			if (!Boolean.parseBoolean(def.getProperties().getProperty(
-					CERTIFICATE_VERIFICATION_ENABLED, "false"))) {
-				c.setCertificateVerificationEnabled(false);
-			}
-		} catch (Exception e) {
-			logger.warn("",e);
-		}
-		c.markImmutable();
+		A10HAClientImpl c = new A10HAClientImpl(def.getProperties()
+				.getProperty("url"), def.getProperties()
+				.getProperty("username"), def.getProperties().getProperty(
+				"password"), A10HAClientImpl.DEFAULT_NODE_CHECK_SECS,
+				certVerificationEnabled);
+
 		return c;
 	}
-
-
 
 }

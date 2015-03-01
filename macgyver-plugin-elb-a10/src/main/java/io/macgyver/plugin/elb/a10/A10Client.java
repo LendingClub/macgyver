@@ -15,6 +15,9 @@ package io.macgyver.plugin.elb.a10;
 
 import java.util.Map;
 
+import org.jdom2.Document;
+import org.jdom2.Element;
+
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.collect.Maps;
 
@@ -28,8 +31,20 @@ public interface A10Client {
 
 	public abstract ObjectNode getDeviceInfo();
 
+	@Deprecated
 	public abstract ObjectNode invoke(String method, Map<String, String> params);
 
+	@Deprecated
 	public abstract ObjectNode invoke(String method, String... args);
+	
+	public abstract ObjectNode invokeJson(String method, Map<String, String> params);
 
+	public abstract ObjectNode invokeJson(String method, String... args);
+	
+	public abstract Element invokeXml(String method, String... args);
+	
+	public abstract Element invokeXml(String method, Map<String,String>  args);
+
+	public boolean isActive();
+	
 }
