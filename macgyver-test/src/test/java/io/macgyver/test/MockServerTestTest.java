@@ -20,28 +20,23 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.io.CharStreams;
 
-public class MockServerDemonstrationTest {
+public class MockServerTestTest extends MockServerTest {
 
-	Logger logger = LoggerFactory.getLogger(MockServerDemonstrationTest.class);
+	Logger logger = LoggerFactory.getLogger(MockServerTestTest.class);
 	
 	
-	@Rule
-	public MockServerRule mockServerRule = new MockServerRule(this);
-
-	// mockServer will be set automatically by the MockServerRule
-	private MockServerClient mockServer;
 	
 	@Test
 	public void demonstrateIt() throws Exception {
 		
 	
-		String listenUrl = "http://localhost:"+mockServerRule.getHttpPort();
+		String listenUrl = getMockServerUrl();
 		
 		logger.info("mock server: {}",listenUrl);
 		
 	
 		
-		mockServer.when(HttpRequest.request().withPath("/greet")).respond(HttpResponse.response().withBody("hello"));
+		getMockServerClient().when(HttpRequest.request().withPath("/greet")).respond(HttpResponse.response().withBody("hello"));
 		
 		
 		// Now connect to the mock server and get the greeting

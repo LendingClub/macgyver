@@ -34,4 +34,5 @@ macgyver-titan-bdb/
 macgyver-test-project/data/
 macgyver-plugin-cloud-vsphere/config
 mockserver.log
+mockserver.*.log
 mockserver_request.log
