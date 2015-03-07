@@ -1,40 +1,43 @@
 package io.macgyver.test;
 
 import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.mockserver.client.server.MockServerClient;
 import org.mockserver.integration.ClientAndServer;
+import org.mockserver.mock.Expectation;
 import org.mockserver.socket.PortFactory;
 import org.slf4j.LoggerFactory;
 
-public class MockServerTest {
+public class MockServerTest implements MockServerSupport {
 
 	// mockServer will be set automatically by the MockServerRule
-	static private MockServerClient mockServer;
-	static private int mockServerPort;
+	static private MockServerMixin mockServerMixin;
+
 
 	@BeforeClass
 	public static void setupMockServer() {
-		mockServerPort = PortFactory.findFreePort();
-		mockServer = ClientAndServer.startClientAndServer(mockServerPort);
-
-		LoggerFactory.getLogger(MockServerTest.class).info(
-				"mock server running on port: {}", mockServerPort);
+		mockServerMixin = new MockServerMixin();
+		
 	}
 
-	@After
-	public void cleanupMockServer() {
-		mockServer.stop();
+	@AfterClass
+	public static void cleanupMockServer() {
+		mockServerMixin.stop();
 	}
 
-	protected MockServerClient getMockServerClient() {
-		return mockServer;
+	public MockServerClient getMockServerClient() {
+		return mockServerMixin.getMockServerClient();
 	}
 
-	protected String getMockServerUrl() {
-		String listenUrl = "http://localhost:" + mockServerPort;
-		return listenUrl;
+	public String getMockServerUrl() {
+		return mockServerMixin.getMockServerUrl();
+	}
+
+	@Override
+	public Expectation getFirstExpectation() {
+		return mockServerMixin.getFirstExpectation();
 	}
 
 }
