@@ -26,6 +26,7 @@ import org.junit.Test;
 import org.mockserver.client.server.MockServerClient;
 import org.mockserver.integration.ClientAndServer;
 import org.mockserver.junit.MockServerRule;
+import org.mockserver.mock.Expectation;
 import org.mockserver.model.HttpRequest;
 import org.mockserver.model.HttpResponse;
 import org.slf4j.Logger;
@@ -42,6 +43,7 @@ public class MockServerTestTest extends MockServerTest {
 	@Test
 	public void demonstrateIt() throws Exception {
 		
+		getMockServerClient().reset();
 	
 		String listenUrl = getMockServerUrl();
 		
@@ -59,11 +61,17 @@ public class MockServerTestTest extends MockServerTest {
 		
 		c.connect();
 		
-		
+		// assert that we got what we expected
 		assertThat(c.getResponseCode()).isEqualTo(200);
 		assertThat(CharStreams.toString( new InputStreamReader( c.getInputStream(), "UTF-8" ) )).isEqualTo("hello");
 		
-	
+		
+		// now check that we sent what we thought we sent
+		Expectation exp = getFirstExpectation();
+		assertThat(exp.getHttpRequest().getPath()).isEqualTo("/greet");
+		
+		// And sense we have the full request/response, we can also ask mock-server what the response contained
+		assertThat(exp.getHttpResponse(false).getBodyAsString()).isEqualTo("hello");
 	
 	}
 }
