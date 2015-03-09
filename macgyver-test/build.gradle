@@ -29,7 +29,7 @@ dependencies {
 	compile "org.springframework.boot:spring-boot:${SPRING_BOOT_VERSION}"
 	compile "org.springframework.boot:spring-boot-starter-test:${SPRING_BOOT_VERSION}"
 	compile "org.mockito:mockito-all:${MOCKITO_VERSION}"
-	compile 'org.mock-server:mockserver-netty:3.9.1'
+	compile 'com.squareup.okhttp:mockwebserver:2.2.0'
 
     
 
