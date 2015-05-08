@@ -89,10 +89,11 @@ public class A10HAClientImpl implements A10Client, Runnable {
 
 		@Override
 		public A10Client load(String ignore) throws Exception {
-			// This is a synchronous check...we don't realy want to see many of
+			// This is a synchronous check...we don't really want to see many of
 			// these
 			logger.debug("sync check for active A10...");
-			return findActiveA10();
+			findActiveA10();
+			return getActiveClient();
 		}
 
 	}
@@ -121,7 +122,6 @@ public class A10HAClientImpl implements A10Client, Runnable {
 	public A10Client getInactiveClient() {
 		
 		System.out.println("cache at getInactiveClient():  " + cache.asMap());
-
 
 		try {
 			return cache.get(INACTIVE_KEY);
@@ -156,7 +156,7 @@ public class A10HAClientImpl implements A10Client, Runnable {
 		}
 	}
 
-	protected A10Client findActiveA10() {
+	protected void findActiveA10() {
 
 		logger.debug("searching for active A10");
 
@@ -184,11 +184,13 @@ public class A10HAClientImpl implements A10Client, Runnable {
 		
 		System.out.println("cache: " + cache.asMap());
 
-		if (cache.getIfPresent(ACTIVE_KEY)!=null) { 
-			return getActiveClient();
-		} else { 
-			throw new ElbException("active A10 not found in (" + clients + ")");
-		}
+//		if (cache.getIfPresent(ACTIVE_KEY)!=null) { 
+//			return getActiveClient();
+//		} else { 
+//			throw new ElbException("active A10 not found in (" + clients + ")");
+//		}
+		
+		
 	}
 
 	@Deprecated
