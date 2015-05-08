@@ -49,6 +49,10 @@ public class A10HAClientImpl implements A10Client, Runnable {
 
 	public static String ACTIVE_KEY = "ACTIVE_KEY";
 	public static String INACTIVE_KEY = "INACTIVE_KEY";
+	
+	private boolean returnActiveA10 = true;
+
+	
 
 	public A10HAClientImpl() {
 		this(DEFAULT_NODE_CHECK_SECS, false);
@@ -92,17 +96,15 @@ public class A10HAClientImpl implements A10Client, Runnable {
 			// This is a synchronous check...we don't really want to see many of
 			// these
 			logger.debug("sync check for active A10...");
-			findActiveA10();
-			return getActiveClient();
+			return findA10();
 		}
 
 	}
 
 	public A10Client getActiveClient() {
-
-		System.out.println("cache at getActiveClient():  " + cache.asMap());
-
+		
 		try {
+			setReturnActiveA10(true);
 			return cache.get(ACTIVE_KEY);
 		} catch (ExecutionException e) {
 			throw new ElbException(e);
@@ -121,9 +123,8 @@ public class A10HAClientImpl implements A10Client, Runnable {
 	
 	public A10Client getInactiveClient() {
 		
-		System.out.println("cache at getInactiveClient():  " + cache.asMap());
-
 		try {
+			setReturnActiveA10(false);
 			return cache.get(INACTIVE_KEY);
 		} catch (ExecutionException e) {
 			throw new ElbException(e);
@@ -156,7 +157,7 @@ public class A10HAClientImpl implements A10Client, Runnable {
 		}
 	}
 
-	protected void findActiveA10() {
+	protected A10Client findA10() {
 
 		logger.debug("searching for active A10");
 
@@ -182,13 +183,19 @@ public class A10HAClientImpl implements A10Client, Runnable {
 
 		}
 		
-		System.out.println("cache: " + cache.asMap());
-
-//		if (cache.getIfPresent(ACTIVE_KEY)!=null) { 
-//			return getActiveClient();
-//		} else { 
-//			throw new ElbException("active A10 not found in (" + clients + ")");
-//		}
+		if (isReturnActiveA10()) { 
+			if (cache.getIfPresent(ACTIVE_KEY)!=null) { 
+				return getActiveClient();
+			} else { 
+				throw new ElbException("active A10 not found in (" + clients + ")");
+			}
+		} else { 
+			if (cache.getIfPresent(INACTIVE_KEY)!=null) { 
+				return getInactiveClient();
+			} else { 
+				throw new ElbException("inactive A10 not found in (" + clients + ")");
+			}
+		}
 		
 		
 	}
@@ -233,10 +240,20 @@ public class A10HAClientImpl implements A10Client, Runnable {
 	public void run() {
 		try {
 			logger.debug("performing maintenance on {}", this);
-			findActiveA10();
+
+			setReturnActiveA10(true);
+			findA10();
 		} catch (Exception e) {
 			logger.warn("", e);
 		}
+	}
+	
+	public boolean isReturnActiveA10() {
+		return returnActiveA10;
+	}
+
+	public void setReturnActiveA10(boolean returnActiveA10) {
+		this.returnActiveA10 = returnActiveA10;
 	}
 
 	@Override
