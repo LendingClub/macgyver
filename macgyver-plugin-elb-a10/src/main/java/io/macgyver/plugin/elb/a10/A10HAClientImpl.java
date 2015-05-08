@@ -48,6 +48,7 @@ public class A10HAClientImpl implements A10Client, Runnable {
 	private static WeakRefScheduler daemon = new WeakRefScheduler(3);
 
 	public static String ACTIVE_KEY = "ACTIVE_KEY";
+	public static String INACTIVE_KEY = "INACTIVE_KEY";
 
 	public A10HAClientImpl() {
 		this(DEFAULT_NODE_CHECK_SECS, false);
@@ -98,8 +99,32 @@ public class A10HAClientImpl implements A10Client, Runnable {
 
 	public A10Client getActiveClient() {
 
+		System.out.println("cache at getActiveClient():  " + cache.asMap());
+
 		try {
 			return cache.get(ACTIVE_KEY);
+		} catch (ExecutionException e) {
+			throw new ElbException(e);
+		} catch (UncheckedExecutionException e) {
+			Throwable t = e.getCause();
+
+			if (t != null && t instanceof RuntimeException) {
+				throw ((RuntimeException) t);
+			}
+			if (t != null) {
+				throw new ElbException(e);
+			}
+			throw e;
+		}
+	}
+	
+	public A10Client getInactiveClient() {
+		
+		System.out.println("cache at getInactiveClient():  " + cache.asMap());
+
+
+		try {
+			return cache.get(INACTIVE_KEY);
 		} catch (ExecutionException e) {
 			throw new ElbException(e);
 		} catch (UncheckedExecutionException e) {
@@ -143,9 +168,10 @@ public class A10HAClientImpl implements A10Client, Runnable {
 
 					ensureClientIsFirstInList(c);
 					cache.put(ACTIVE_KEY, c);
-					return c;
 				} else {
 					logger.debug("inactive: {}", c);
+					
+					cache.put(INACTIVE_KEY, c);
 				}
 
 			} catch (Exception e) {
@@ -155,7 +181,14 @@ public class A10HAClientImpl implements A10Client, Runnable {
 			}
 
 		}
-		throw new ElbException("active A10 not found in (" + clients + ")");
+		
+		System.out.println("cache: " + cache.asMap());
+
+		if (cache.getIfPresent(ACTIVE_KEY)!=null) { 
+			return getActiveClient();
+		} else { 
+			throw new ElbException("active A10 not found in (" + clients + ")");
+		}
 	}
 
 	@Deprecated
