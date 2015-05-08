@@ -48,6 +48,11 @@ public class A10HAClientImpl implements A10Client, Runnable {
 	private static WeakRefScheduler daemon = new WeakRefScheduler(3);
 
 	public static String ACTIVE_KEY = "ACTIVE_KEY";
+	public static String INACTIVE_KEY = "INACTIVE_KEY";
+	
+	private boolean returnActiveA10 = true;
+
+	
 
 	public A10HAClientImpl() {
 		this(DEFAULT_NODE_CHECK_SECS, false);
@@ -88,18 +93,39 @@ public class A10HAClientImpl implements A10Client, Runnable {
 
 		@Override
 		public A10Client load(String ignore) throws Exception {
-			// This is a synchronous check...we don't realy want to see many of
+			// This is a synchronous check...we don't really want to see many of
 			// these
 			logger.debug("sync check for active A10...");
-			return findActiveA10();
+			return findA10();
 		}
 
 	}
 
 	public A10Client getActiveClient() {
-
+		
 		try {
+			setReturnActiveA10(true);
 			return cache.get(ACTIVE_KEY);
+		} catch (ExecutionException e) {
+			throw new ElbException(e);
+		} catch (UncheckedExecutionException e) {
+			Throwable t = e.getCause();
+
+			if (t != null && t instanceof RuntimeException) {
+				throw ((RuntimeException) t);
+			}
+			if (t != null) {
+				throw new ElbException(e);
+			}
+			throw e;
+		}
+	}
+	
+	public A10Client getInactiveClient() {
+		
+		try {
+			setReturnActiveA10(false);
+			return cache.get(INACTIVE_KEY);
 		} catch (ExecutionException e) {
 			throw new ElbException(e);
 		} catch (UncheckedExecutionException e) {
@@ -131,7 +157,7 @@ public class A10HAClientImpl implements A10Client, Runnable {
 		}
 	}
 
-	protected A10Client findActiveA10() {
+	protected A10Client findA10() {
 
 		logger.debug("searching for active A10");
 
@@ -143,9 +169,10 @@ public class A10HAClientImpl implements A10Client, Runnable {
 
 					ensureClientIsFirstInList(c);
 					cache.put(ACTIVE_KEY, c);
-					return c;
 				} else {
 					logger.debug("inactive: {}", c);
+					
+					cache.put(INACTIVE_KEY, c);
 				}
 
 			} catch (Exception e) {
@@ -155,7 +182,22 @@ public class A10HAClientImpl implements A10Client, Runnable {
 			}
 
 		}
-		throw new ElbException("active A10 not found in (" + clients + ")");
+		
+		if (isReturnActiveA10()) { 
+			if (cache.getIfPresent(ACTIVE_KEY)!=null) { 
+				return getActiveClient();
+			} else { 
+				throw new ElbException("active A10 not found in (" + clients + ")");
+			}
+		} else { 
+			if (cache.getIfPresent(INACTIVE_KEY)!=null) { 
+				return getInactiveClient();
+			} else { 
+				throw new ElbException("inactive A10 not found in (" + clients + ")");
+			}
+		}
+		
+		
 	}
 
 	@Deprecated
@@ -198,10 +240,20 @@ public class A10HAClientImpl implements A10Client, Runnable {
 	public void run() {
 		try {
 			logger.debug("performing maintenance on {}", this);
-			findActiveA10();
+
+			setReturnActiveA10(true);
+			findA10();
 		} catch (Exception e) {
 			logger.warn("", e);
 		}
+	}
+	
+	public boolean isReturnActiveA10() {
+		return returnActiveA10;
+	}
+
+	public void setReturnActiveA10(boolean returnActiveA10) {
+		this.returnActiveA10 = returnActiveA10;
 	}
 
 	@Override
