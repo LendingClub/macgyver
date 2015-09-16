@@ -53,6 +53,14 @@ public interface A10Client {
 
 	public abstract Element invokeXml(String method, Map<String,String>  args);
 	
+	public abstract String invokeXmlReturnString(String method, Element body, String... args);
+	
+	public abstract String invokeXmlReturnString(String method, String... args);
+	
+	public abstract String invokeXmlReturnString(String method, Element body, Map<String,String>  params);
+
+	public abstract String invokeXmlReturnString(String method, Map<String,String>  params);
+	
 	public boolean isActive();
 	
 }
