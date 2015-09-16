@@ -274,6 +274,17 @@ public class A10ClientImpl implements A10Client {
 	public ObjectNode invokeJson(String method, JsonNode body, String... args) {
 		return invokeJson(method, body, toMap(args));
 	}
+	
+	@Override
+	public String invokeJsonReturnString(String method, JsonNode body, String... args) {
+		return invokeJsonReturnString(method, body, toMap(args));
+	}
+
+	@Override
+	public String invokeJsonReturnString(String method, String... args) {
+		return invokeJsonReturnString(method, null, toMap(args));
+	}
+
 
 	@Override
 	public Element invokeXml(String method, Element body, String... args) {
@@ -307,6 +318,23 @@ public class A10ClientImpl implements A10Client {
 
 		return invokeJson(copy, body);
 	}
+	
+	@Override
+	public String invokeJsonReturnString(String method, JsonNode body, Map<String, String> params) {
+		if (params == null) { 
+			params = Maps.newConcurrentMap();
+		}
+		Map<String,String> copy = Maps.newHashMap(params);
+		copy.put("method", method);
+		
+		return invokeJsonReturnString(copy, body);
+	}
+
+	@Override
+	public String invokeJsonReturnString(String method, Map<String, String> params) {
+		return invokeJsonReturnString(method, null, params);
+	}
+
 
 	@Override
 	public Element invokeXml(String method, Map<String, String> params) {
@@ -409,6 +437,48 @@ public class A10ClientImpl implements A10Client {
 			throw new ElbException(e);
 		}
 
+	}
+	
+	protected String invokeJsonReturnString(Map<String, String> x, JsonNode optionalBody) { 
+		try {
+
+			String method = x.get("method");
+			Preconditions.checkArgument(!Strings.isNullOrEmpty(method),
+					"method argument must be passed");
+
+			Response resp;
+
+			if (optionalBody == null) {
+				FormEncodingBuilder fb = new FormEncodingBuilder().add(
+						"session_id", getAuthToken()).add("format", "json");
+
+				for (Map.Entry<String, String> entry : x.entrySet()) {
+					fb = fb.add(entry.getKey(), entry.getValue());
+				}
+
+				resp = getClient().newCall(
+						new Request.Builder().url(getUrl()).post(fb.build())
+								.build()).execute();
+			} else {
+
+				String url = formatUrl(x, "json");
+				String bodyAsString = optionalBody.toString();
+
+				final MediaType JSON = MediaType
+						.parse("application/json; charset=utf-8");
+				resp = getClient().newCall(
+						new Request.Builder().url(url).post(
+
+						RequestBody.create(JSON, bodyAsString))
+								.header("Content-Type", "application/json")
+								.build()).execute();
+			}
+
+			return resp.body().string().trim();
+
+		} catch (IOException e) {
+			throw new ElbException(e);
+		}
 	}
 
 	protected Element invokeXml(Map<String, String> x, Element optionalBody) {
@@ -609,5 +679,4 @@ public class A10ClientImpl implements A10Client {
 			throw new IllegalArgumentException("invalid url: " + url);
 		}
 	}
-
 }

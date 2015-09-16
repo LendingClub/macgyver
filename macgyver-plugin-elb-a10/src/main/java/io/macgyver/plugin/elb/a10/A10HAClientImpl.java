@@ -252,4 +252,27 @@ public class A10HAClientImpl implements A10HAClient, Runnable {
 		return getActiveClient().invokeXml(method, body, params);
 	}
 
+	@Override
+	public String invokeJsonReturnString(String method, JsonNode body,
+			Map<String, String> params) {
+		return getActiveClient().invokeJsonReturnString(method, params);
+	}
+
+	@Override
+	public String invokeJsonReturnString(String method,
+			Map<String, String> params) {
+		return getActiveClient().invokeJsonReturnString(method, params);
+	}
+
+	@Override
+	public String invokeJsonReturnString(String method, JsonNode body,
+			String... args) {
+		return getActiveClient().invokeJsonReturnString(method, body, args);
+	}
+
+	@Override
+	public String invokeJsonReturnString(String method, String... args) {
+		return getActiveClient().invokeJsonReturnString(method, args);
+	}
+
 }

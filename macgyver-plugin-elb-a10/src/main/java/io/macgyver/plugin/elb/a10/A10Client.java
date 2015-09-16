@@ -33,9 +33,17 @@ public interface A10Client {
 
 	public abstract ObjectNode invokeJson(String method, Map<String, String> params);
 	
+	public abstract String invokeJsonReturnString(String method, JsonNode body, Map<String, String> params);
+
+	public abstract String invokeJsonReturnString(String method, Map<String, String> params);
+	
 	public abstract ObjectNode invokeJson(String method, JsonNode body, String... args);
 	
 	public abstract ObjectNode invokeJson(String method, String... args);
+	
+	public abstract String invokeJsonReturnString(String method, JsonNode body, String... args);
+	
+	public abstract String invokeJsonReturnString(String method, String... args);
 	
 	public abstract Element invokeXml(String method, Element body, String... args);
 	
