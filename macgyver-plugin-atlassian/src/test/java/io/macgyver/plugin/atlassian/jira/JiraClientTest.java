@@ -13,7 +13,7 @@
  */
 package io.macgyver.plugin.atlassian.jira;
 
-import static org.assertj.core.api.StrictAssertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import org.assertj.core.api.Assertions;
 import org.junit.Rule;

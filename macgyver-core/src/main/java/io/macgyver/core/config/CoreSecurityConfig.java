@@ -112,8 +112,8 @@ public class CoreSecurityConfig extends WebSecurityConfigurerAdapter {
 
 	@SuppressWarnings("rawtypes")
 	@Bean
-	List<AccessDecisionVoter> macAccessDecisionVoterList() {
-		List<AccessDecisionVoter> x = Lists.newCopyOnWriteArrayList();
+	List<AccessDecisionVoter<? extends Object>> macAccessDecisionVoterList() {
+		List<AccessDecisionVoter<? extends Object>> x = Lists.newCopyOnWriteArrayList();
 		x.add(new LogOnlyAccessDecisionVoter());
 		x.add(new RoleVoter());
 		x.add(new WebExpressionVoter());
@@ -125,7 +125,7 @@ public class CoreSecurityConfig extends WebSecurityConfigurerAdapter {
 	@Bean
 	AccessDecisionManager macAccessDecisionManager() {
 
-		List<AccessDecisionVoter> list = macAccessDecisionVoterList();
+		List<AccessDecisionVoter<? extends Object>> list = macAccessDecisionVoterList();
 
 		return new MacGyverAccessDecisionManager(list);
 	}
