@@ -16,7 +16,7 @@ configurations {
 mainClassName = 'io.macgyver.core.ServerMain'
 
 dependencies {  
-    compile 'org.mousio:etcd4j:2.7.0'
+    compile 'org.mousio:etcd4j:2.8.0'
     testCompile project(':macgyver-test')
     compile project(':macgyver-core')
     

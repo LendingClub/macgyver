@@ -21,6 +21,7 @@ import javax.servlet.http.HttpServletRequest;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.google.common.base.Strings;
 
 import io.macgyver.core.util.JsonNodes;
 import io.macgyver.core.util.Neo4jPropertyFlattener;
@@ -43,7 +44,7 @@ public class BasicCheckInProcessor implements CheckInProcessor {
 	public ObjectNode process(HttpServletRequest request) throws IOException{
 
 		ObjectNode data = JsonNodes.mapper.createObjectNode();
-		if (request.getMethod().equalsIgnoreCase("GET")) {
+		if (request.getMethod().equalsIgnoreCase("GET") || Strings.nullToEmpty(request.getContentType()).toLowerCase().contains("x-www-form-urlencoded")) {
 			
 			Enumeration<String> t = request.getParameterNames();
 			while (t.hasMoreElements()) {
@@ -53,7 +54,7 @@ public class BasicCheckInProcessor implements CheckInProcessor {
 			}
 		}
 		else if (request.getMethod().equalsIgnoreCase("PUT") || request.getMethod().equalsIgnoreCase("POST")) {
-			if (request.getContentType().contains("json")) {
+			if (request.getContentType().toLowerCase().contains("json")) {
 				try (InputStream is = request.getInputStream()) {
 					data = (ObjectNode) JsonNodes.mapper.readTree(is);
 				}

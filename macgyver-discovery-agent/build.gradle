@@ -1,0 +1,30 @@
+apply plugin: 'java'
+apply plugin: 'eclipse'
+apply plugin: 'maven'
+//apply plugin: 'application'
+apply plugin: "jacoco"
+apply plugin: "signing"
+
+group 'io.macgyver'
+
+configurations {
+	//all*.exclude group: 'org.codehaus.groovy', module: 'groovy'
+	all*.exclude group: 'log4j'
+	all*.exclude group: 'xml-apis'
+    all*.exclude group: 'commons-logging'
+}
+
+
+sourceCompatibility = 1.7
+targetCompatibility = 1.7
+
+dependencies {
+
+    compile "com.squareup.okhttp:mockwebserver:${OKHTTP_VERSION}"
+
+	testCompile "org.assertj:assertj-core:${ASSERTJ_VERSION}"  
+	testCompile "junit:junit:${JUNIT_VERSION}"
+    
+    testCompile "ch.qos.logback:logback-classic:${LOGBACK_VERSION}"
+}
+

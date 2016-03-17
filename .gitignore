@@ -40,3 +40,4 @@ mockserver_request.log
 macgyver-core/lte
 *.snap
 *.wal
+default.etcd/
