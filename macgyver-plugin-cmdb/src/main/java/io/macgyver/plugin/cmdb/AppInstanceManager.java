@@ -46,7 +46,7 @@ public class AppInstanceManager {
 
 		data = rx.Observable.just(data).map(new Neo4jPropertyFlattener()).toBlocking().first();
 	
-		String host = data.path("host").asText();
+		String host = data.path("host").asText().replace(".tlcinternal.com","");
 		String group = data.path("groupId").asText();
 		String app = data.path("appId").asText();
 		String index = data.path("index").asText("default");
