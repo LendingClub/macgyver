@@ -16,7 +16,6 @@ package io.macgyver.cli.command;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
-
 import com.beust.jcommander.Parameters;
 import com.google.common.collect.Lists;
 
@@ -27,17 +26,16 @@ public class HelpCommand extends Command {
 
 	@Override
 	public void execute() throws IOException {
-		
+
 		List<String> x = Lists.newArrayList(getCLI().getCommandMap().keySet());
-		
+
 		Collections.sort(x);
-		
-		System.out.println("usage: macgyver <command> [args...]");
+
+		System.out.println("usage: macgyver <command> [<args...>]");
 		System.out.println("");
+		System.out.println("These are common MacGyver commands used in various situations:");
 		x.forEach( it -> {
 			System.out.println(it);
 		});
-
 	}
-
 }

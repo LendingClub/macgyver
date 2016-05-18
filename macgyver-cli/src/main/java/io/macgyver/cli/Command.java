@@ -21,6 +21,8 @@ import java.util.Properties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.beust.jcommander.JCommander;
+import com.beust.jcommander.Parameter;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
@@ -39,7 +41,14 @@ public abstract class Command {
 	Properties props = new Properties();
 
 	CLI cli;
-	
+
+	@Parameter(names ="--help", help = true, hidden = true)
+	private boolean help = false;
+
+	public boolean getHelp() {
+		return help;
+	}
+
 	public String getCommandName() {
 		List<String> list = Splitter.on(".").splitToList(getClass().getName());
 		String name = list.get(list.size() - 1);
@@ -61,15 +70,13 @@ public abstract class Command {
 		}
 
 		return sb.toString();
-		
-	}
-	
 
+	}
 
 	public final Command init(String[] args) {
 		/*
 		 * this.args = Collections.unmodifiableList(Lists.newArrayList(args));
-		 * 
+		 *
 		 * OptionParser p = optionParser;
 		 * //p.allowsUnrecognizedOptions();
 		 * p.accepts("endpoint-url").withRequiredArg();
@@ -78,7 +85,7 @@ public abstract class Command {
 		 * p.accepts("token").withRequiredArg();
 		 * p.accepts("debug");
 		 * configure(optionParser);
-		 * 
+		 *
 		 * optionSetx = optionParser.parse(args);
 		 * parseConfig();
 		 */
@@ -118,7 +125,7 @@ public abstract class Command {
 
 	public String getServerUrl() {
 
-		
+
 		String url = getConfig().path("url").asText().trim();
 		if (Strings.isNullOrEmpty(url)) {
 			throw new CLIException("url must be set");
@@ -129,10 +136,8 @@ public abstract class Command {
 		return url;
 	}
 
-
-	
 	public CLI getCLI() {
 		return cli;
 	}
-	
+
 }
