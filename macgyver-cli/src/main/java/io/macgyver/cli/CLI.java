@@ -45,7 +45,7 @@ public class CLI {
 	String[] args;
 
 	ConfigManager configManager = new ConfigManager();
-	
+
 	public static final String DEFAULT_PACKAGE="io.macgyver.cli.command";
 	public static final String EXTENSION_PACKAGE="io.macgyver.plugin.cli";
 
@@ -58,19 +58,19 @@ public class CLI {
 			List<Class<? extends Command>> classList = Lists.newArrayList();
 
 			List<ClassInfo> classInfoList = Lists.newArrayList();
-			
+
 			classInfoList.addAll(ClassPath.from(Thread.currentThread().getContextClassLoader())
 					.getTopLevelClasses(DEFAULT_PACKAGE));
-			
+
 			classInfoList.addAll(ClassPath.from(Thread.currentThread().getContextClassLoader())
 					.getTopLevelClasses(EXTENSION_PACKAGE));
-		
+
 			classInfoList.forEach(it -> {
 						try {
-					
+
 							Class clazz = Class.forName(it.getName());
 
-							
+
 							if (Command.class.isAssignableFrom(clazz) ) {
 								if (Modifier.isAbstract(clazz.getModifiers())) {
 									logger.debug("{} is abstract",clazz);
@@ -79,7 +79,7 @@ public class CLI {
 									logger.debug("adding {}",clazz);
 									classList.add((Class<? extends Command>) clazz);
 								}
-								
+
 							}
 						} catch (ClassNotFoundException e) {
 							logger.warn("", e);
@@ -92,7 +92,7 @@ public class CLI {
 	}
 
 	void buildCommands() {
-		
+
 		findCommands().forEach(c-> {
 			try {
 				Command command = c.newInstance();
@@ -104,11 +104,11 @@ public class CLI {
 			catch (IllegalAccessException | InstantiationException e) {
 				logger.warn("could not load command: "+c,e);
 			}
-			
+
 		});
-	
+
 	}
-	
+
 	public Map<String,Command> getCommandMap() {
 		return ImmutableMap.copyOf(commandMap);
 	}
@@ -119,20 +119,20 @@ public class CLI {
 		return commander.getParsedCommand();
 	}
 	public void run(String ...v) throws IOException {
-		
+
 		configureLogging();
-		
+
 		args = v;
-		
+
 		configManager.loadConfig();
-		
+
 		buildCommands();
-		
+
 		commander.parse(args);
-		
+
 		String commandName = getCommandName();
 		logger.info("command name: {}",commandName);
-		
+
 		if (commandName==null) {
 			throw new CLIException("no command specified");
 		}
@@ -148,7 +148,7 @@ public class CLI {
         	jCommander.usage();
         	return;
         }
-		command.execute();	
+		command.execute();
 	}
 
 	public JCommander getCommander() {
@@ -178,7 +178,7 @@ public class CLI {
 		return System.getProperty("cli.launch", "false").equals("true");
 	}
 	public static void configureLogging() {
-	
+
 		if (!isCommandLineLoggingEnabled()) {
 			logger = LoggerFactory.getLogger(CLI.class);
 		} else {
@@ -214,12 +214,12 @@ public class CLI {
 
 		try {
 			CLI m = new CLI();
-		
+
 			m.run(args);
 
 		} catch (CLIException  | ParameterException e) {
 			logger.debug("",e);
-		
+
 			System.err.println("error: " + e.getMessage());
 
 		}
