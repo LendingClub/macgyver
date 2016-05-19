@@ -11,24 +11,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.macgyver.cli;
+ package io.macgyver.cli;
 
-import java.io.IOException;
-import java.util.List;
-import java.util.Optional;
-import java.util.Properties;
+ import java.io.IOException;
+ import java.util.List;
+ import java.util.Optional;
+ import java.util.Properties;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+ import org.slf4j.Logger;
+ import org.slf4j.LoggerFactory;
 
-import com.beust.jcommander.JCommander;
-import com.beust.jcommander.Parameter;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.google.common.base.Splitter;
-import com.google.common.base.Strings;
+ import com.beust.jcommander.JCommander;
+ import com.beust.jcommander.Parameter;
+ import com.fasterxml.jackson.databind.node.ObjectNode;
+ import com.google.common.base.Splitter;
+ import com.google.common.base.Strings;
 
-import io.macgyver.okrest3.OkRestClient;
-import io.macgyver.okrest3.OkRestTarget;
+ import io.macgyver.okrest3.OkRestClient;
+ import io.macgyver.okrest3.OkRestTarget;
 
 
 
@@ -42,12 +42,12 @@ public abstract class Command {
 
 	CLI cli;
 
-	@Parameter(names ="--help", help = true, hidden = true)
-	private boolean help = false;
+  @Parameter(names ="--help", help = true, hidden = true)
+  private boolean help = false;
 
-	public boolean getHelp() {
-		return help;
-	}
+  public boolean getHelp() {
+    return help;
+  }
 
 	public String getCommandName() {
 		List<String> list = Splitter.on(".").splitToList(getClass().getName());
@@ -72,6 +72,8 @@ public abstract class Command {
 		return sb.toString();
 
 	}
+
+
 
 	public final Command init(String[] args) {
 		/*
@@ -136,8 +138,14 @@ public abstract class Command {
 		return url;
 	}
 
+
+
 	public CLI getCLI() {
 		return cli;
 	}
 
+	public void exitWithError(String message) {
+		System.err.println("error: "+message);
+		System.exit(1);
+	}
 }

@@ -116,9 +116,19 @@ public class LoginCommand  extends Command {
 		header = "Basic " + BaseEncoding.base64().encode(header.getBytes());
 		
 	
+		
 		OkRestResponse rr = new OkRestClient.Builder().build().uri(getServerUrl()).path("/api/core/token/create").addHeader("Authorization", header).get()
 				.execute();
 
+		if (!rr.response().isSuccessful()) {
+			int rc = rr.response().code();
+			if (rc==401) {
+				exitWithError("authentication for '"+username+"' failed");
+			}
+			else {
+				exitWithError("server response code: "+rc);
+			}
+		}
 		JsonNode n = rr.getBody(JsonNode.class);
 	
 
