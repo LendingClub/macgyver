@@ -41,6 +41,7 @@ import io.macgyver.core.Kernel;
 import io.macgyver.core.MacGyverException;
 import io.macgyver.core.ServiceNotFoundException;
 import io.macgyver.core.crypto.Crypto;
+import io.macgyver.core.service.config.CompositeConfigLoader;
 import reactor.bus.Event;
 import reactor.bus.EventBus;
 
@@ -63,6 +64,9 @@ public class ServiceRegistry {
 	@Autowired
 	EventBus eventBus;
 
+	@Autowired
+	CompositeConfigLoader compositeConfigLoader;
+	
 	@SuppressWarnings("unchecked")
 	public <T> T get(String name, Class<T> t) {
 		return (T) get(name);
@@ -121,7 +125,9 @@ public class ServiceRegistry {
 
 		collectServiceFactories();
 
-		Properties properties = reloadProperties();
+
+		Properties properties = new Properties();
+		properties.putAll(compositeConfigLoader.apply(Maps.newHashMap()));
 
 		for (Object keyObj : properties.keySet()) {
 			String key = keyObj.toString();
@@ -222,30 +228,7 @@ public class ServiceRegistry {
 		}
 	}
 
-	protected Properties reloadProperties() throws MalformedURLException, IOException {
-		Properties p = new Properties();
 
-		File configGroovy = Bootstrap.getInstance().resolveConfig("services.groovy");
-
-		logger.info("loading services from: {}", configGroovy);
-		ConfigSlurper slurper = new ConfigSlurper();
-		if (Kernel.getExecutionProfile().isPresent()) {
-			slurper.setEnvironment(Kernel.getExecutionProfile().get());
-		}
-
-		if (configGroovy.exists()) {
-			ConfigObject obj = slurper.parse(configGroovy.toURI().toURL());
-
-			p = obj.toProperties();
-
-			p = crypto.decryptProperties(p);
-
-		} else {
-			logger.warn("services config file not found: {}", configGroovy);
-		}
-		return p;
-
-	}
 
 	/**
 	 * Returns an immutable Map of service definitions.

@@ -13,6 +13,7 @@
  */
 package io.macgyver.core.config;
 
+import java.awt.Composite;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.net.MalformedURLException;
@@ -64,6 +65,10 @@ import io.macgyver.core.scheduler.TaskStateManager;
 import io.macgyver.core.script.BindingSupplierManager;
 import io.macgyver.core.script.ExtensionResourceProvider;
 import io.macgyver.core.service.ServiceRegistry;
+import io.macgyver.core.service.config.CompositeConfigLoader;
+import io.macgyver.core.service.config.HJsonConfigLoader;
+import io.macgyver.core.service.config.Neo4jConfigLoader;
+import io.macgyver.core.service.config.ServicesGroovyConfigLoader;
 import io.macgyver.neorx.rest.NeoRxClient;
 import io.macgyver.neorx.rest.NeoRxClientBuilder;
 import it.sauronsoftware.cron4j.Scheduler;
@@ -339,5 +344,27 @@ public class CoreConfig implements EnvironmentAware {
 	@Bean
 	public Scheduler macCron4jScheduler() {
 		return new Scheduler();
+	}
+	
+	@Bean
+	public Neo4jConfigLoader macNeo4jConfigLoader() {
+		return new Neo4jConfigLoader();
+	}
+	
+	@Bean
+	public ServicesGroovyConfigLoader macServiceGroovyConfigLoader() {
+		return new ServicesGroovyConfigLoader();
+	}
+	@Bean
+	public HJsonConfigLoader macHJsonConfigLoader() {
+		return new HJsonConfigLoader();
+	}
+	@Bean
+	public CompositeConfigLoader macCompositeConfigLoader() {
+		CompositeConfigLoader cl =  new CompositeConfigLoader();
+		cl.addLoader(macServiceGroovyConfigLoader());
+		cl.addLoader(macHJsonConfigLoader());
+		cl.addLoader(macNeo4jConfigLoader());
+		return cl;
 	}
 }
