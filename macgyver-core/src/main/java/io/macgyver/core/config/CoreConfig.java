@@ -72,6 +72,7 @@ import io.macgyver.core.service.config.CompositeConfigLoader;
 import io.macgyver.core.service.config.HJsonConfigLoader;
 import io.macgyver.core.service.config.Neo4jConfigLoader;
 import io.macgyver.core.service.config.ServicesGroovyConfigLoader;
+import io.macgyver.core.service.config.SpringConfigLoader;
 import io.macgyver.neorx.rest.NeoRxClient;
 import io.macgyver.neorx.rest.NeoRxClientBuilder;
 import it.sauronsoftware.cron4j.Scheduler;
@@ -420,11 +421,18 @@ public class CoreConfig implements EnvironmentAware {
 	public HJsonConfigLoader macHJsonConfigLoader() {
 		return new HJsonConfigLoader();
 	}
+	
+	@Bean
+	public SpringConfigLoader macSpringConfigLoader() {
+		return new SpringConfigLoader();
+	}
+	
 	@Bean
 	public CompositeConfigLoader macCompositeConfigLoader() {
 		CompositeConfigLoader cl =  new CompositeConfigLoader();
 		cl.addLoader(macServiceGroovyConfigLoader());
 		cl.addLoader(macHJsonConfigLoader());
+		cl.addLoader(new SpringConfigLoader());
 		cl.addLoader(macNeo4jConfigLoader());
 		return cl;
 	}
