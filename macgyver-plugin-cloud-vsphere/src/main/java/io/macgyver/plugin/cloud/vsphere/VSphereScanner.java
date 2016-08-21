@@ -165,6 +165,8 @@ public class VSphereScanner {
 			setVal(n, "vmw_guestHostName", g.getHostName());
 			setVal(n, "vmw_guestAlternateName", cfg.getAlternateGuestName());
 			setVal(n, "vmw_locationId", cfg.getLocationId());
+			setVal(n, "vmw_numCPU", ""+cfg.getHardware().getMemoryMB());
+			setVal(n, "vmw_memoryMB", ""+cfg.getHardware().getNumCPU());
 
 		} catch (Exception e) {
 			logger.warn("", e);
