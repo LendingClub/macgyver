@@ -142,6 +142,7 @@ public class WebConfig implements EnvironmentAware {
 								.setPattern("%h %l %u %t \"%r\" %s %b \"%{Referer}i\" \"%{User-Agent}i\"");
 
 						accessLogValve.setSuffix(".log");
+						accessLogValve.setConditionUnless("SUPPRESS_ACCESS_LOG");
 
 						factory.addContextValves(accessLogValve);
 					} else {

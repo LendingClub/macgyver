@@ -91,7 +91,7 @@ public class CmdbApiController {
 
 		ObjectNode data = toObjectNode(request);
 
-		if (Strings.isNullOrEmpty(conditionalLoggingAttribute)) {
+		if (!Strings.isNullOrEmpty(conditionalLoggingAttribute)) {
 			// allow tomcat to be configured to suppress access log
 			request.setAttribute(conditionalLoggingAttribute, "true");
 		}
