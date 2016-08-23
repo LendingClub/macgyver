@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.StringWriter;
+import java.util.HashMap;
 import java.util.Map;
 
 import javax.script.Bindings;
@@ -34,6 +35,7 @@ import javax.script.SimpleBindings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 
@@ -53,6 +55,12 @@ public class ScriptExecutor implements ApplicationContextAware {
 
 	StringWriter outWriter;
 	StringWriter errWriter;
+
+	@Value(value = "${scriptEngineManagerCachingEnabled:true}")
+	boolean scriptEngineManagerCachingEnabled = true;
+
+	static ScriptEngineManager scriptEngineManager = new ScriptEngineManager();
+	static Map<String, ScriptEngine> scriptEngineCache = new HashMap<String, ScriptEngine>();
 
 	public ExtensionResourceProvider getExtensionResourceLoader() {
 
@@ -119,10 +127,15 @@ public class ScriptExecutor implements ApplicationContextAware {
 
 	public boolean isSupportedScript(Resource f) {
 		try {
-			ScriptEngineManager m = new ScriptEngineManager();
+			ScriptEngine engine = null;
 			String extension = Files.getFileExtension(f.getPath());
-			ScriptEngine engine = m.getEngineByExtension(extension);
-
+			if(!scriptEngineManagerCachingEnabled) {
+				ScriptEngineManager m = new ScriptEngineManager();
+				engine = m.getEngineByExtension(extension);
+			}
+			else {
+				engine = scriptEngineManager.getEngineByExtension(extension);
+			}
 			return engine != null;
 		} catch (Exception e) {
 			return false;
@@ -161,6 +174,13 @@ public class ScriptExecutor implements ApplicationContextAware {
 		return r.getPath().substring(idx + 1);
 	}
 
+	ScriptEngine getEngineByExtensionFromCache(String extension) {
+		if(!scriptEngineCache.containsKey(extension)) {
+			scriptEngineCache.put(extension, scriptEngineManager.getEngineByExtension(extension) );
+		}
+		return scriptEngineCache.get(extension);
+	}
+
 	public Object run(Resource f, Map<String, Object> vars,
 			boolean failIfNotFound) {
 
@@ -173,8 +193,16 @@ public class ScriptExecutor implements ApplicationContextAware {
 				logger.info("init script not found: {}", f);
 				return null;
 			}
-			ScriptEngineManager factory = new ScriptEngineManager();
-			ScriptEngine engine = factory.getEngineByExtension(getExtension(f));
+			ScriptEngine engine = null;
+
+			if(!scriptEngineManagerCachingEnabled) {
+				ScriptEngineManager factory = new ScriptEngineManager();
+				engine = factory.getEngineByExtension(getExtension(f));
+			}
+			else {
+				engine = getEngineByExtensionFromCache(getExtension(f));
+			}
+
 
 			if (engine == null) {
 				throw new ScriptExecutionException(
