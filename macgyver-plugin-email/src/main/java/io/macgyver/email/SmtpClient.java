@@ -26,11 +26,11 @@ import javax.mail.Transport;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 
-import org.assertj.core.util.Strings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.mail.javamail.MimeMessageHelper;
 
+import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 
 public class SmtpClient {
@@ -105,6 +105,8 @@ public class SmtpClient {
 			}
  
 			Transport.send(message);
+			
+			file.delete();
  
 		} catch (MessagingException e) {
 			throw new MailException(e);
