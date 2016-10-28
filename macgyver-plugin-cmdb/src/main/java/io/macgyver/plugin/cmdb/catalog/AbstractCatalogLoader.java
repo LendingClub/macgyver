@@ -90,7 +90,7 @@ public abstract class AbstractCatalogLoader {
 	}
 
 	public <T extends AbstractCatalogLoader> T withDirName(String dirName) {
-		jobPattern = Pattern.compile(".*" + dirName + ".*?\\/((\\S+)\\.[h]*json)");
+		jobPattern = Pattern.compile(".*" + dirName + ".*?\\/((.+?)\\.[h]*json)");
 		return (T) this;
 	}
 
