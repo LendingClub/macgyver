@@ -13,14 +13,10 @@
  */
 package io.macgyver.plugin.cloud.aws;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import com.amazonaws.auth.AWSCredentialsProvider;
-import com.amazonaws.auth.AWSCredentialsProviderChain;
+import com.amazonaws.auth.AWSStaticCredentialsProvider;
 import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.auth.DefaultAWSCredentialsProviderChain;
-import com.amazonaws.internal.StaticCredentialsProvider;
 import com.amazonaws.regions.Region;
 import com.amazonaws.regions.Regions;
 import com.amazonaws.util.StringUtils;
@@ -42,7 +38,7 @@ public class AWSServiceFactory extends ServiceFactory<AWSServiceClient> {
 		AWSServiceClientImpl ci = new AWSServiceClientImpl();
 		ci.setAccountId(def.getProperty("accountId"));
 
-		ci.credentialsProvider = newProviderChain(def);
+		ci.credentialsProvider = getCredentialsProvider(def);
 		String regionName = Strings.emptyToNull(Strings.nullToEmpty(def.getProperties().getProperty("region")).trim());
 		if (regionName != null) {
 			logger.info("setting region: {}", regionName);
@@ -52,16 +48,14 @@ public class AWSServiceFactory extends ServiceFactory<AWSServiceClient> {
 		return ci;
 	}
 
-	private AWSCredentialsProvider newProviderChain(ServiceDefinition def) {
-
-		List<AWSCredentialsProvider> providers = new ArrayList<>();
+	private AWSCredentialsProvider getCredentialsProvider(ServiceDefinition def) {
 
 		String accessKey = def.getProperty("accessKey");
 		String secretKey = def.getProperty("secretKey");
 
 		if (!StringUtils.isNullOrEmpty(accessKey) && !StringUtils.isNullOrEmpty(secretKey)) {
 			logger.info("using static credentials " + accessKey + " for AWS service " + def.getName());
-			providers.add(new StaticCredentialsProvider(new BasicAWSCredentials(accessKey, secretKey)));
+			return new AWSStaticCredentialsProvider(new BasicAWSCredentials(accessKey, secretKey));
 		}
 
 		String sourceService = def.getProperty("sourceService");
@@ -70,15 +64,12 @@ public class AWSServiceFactory extends ServiceFactory<AWSServiceClient> {
 			String roleArn = "arn:aws:iam::" + def.getProperty("accountId") + ":role/" + assumeRoleName;
 			logger.info("using assume-role credentials for " + roleArn + " from " + sourceService + " for AWS service "
 					+ def.getName());
-			providers.add(new AWSServiceClientAssumeRoleCredentialsProvider(registry, sourceService, roleArn));
+			return new AWSServiceClientAssumeRoleCredentialsProvider(registry, sourceService, roleArn);
 		}
 
-		if (providers.isEmpty() || Boolean.parseBoolean(def.getProperty("enableDefaultCredentials"))) {
-			logger.info("using default credentials provider for AWS service " + def.getName());
-			providers.add(new DefaultAWSCredentialsProviderChain());
-		}
-		
-		return new AWSCredentialsProviderChain(providers.toArray(new AWSCredentialsProvider[0]));
+		logger.info("using default credentials provider for AWS service " + def.getName());
+		return new DefaultAWSCredentialsProviderChain();
+
 	}
 
 }

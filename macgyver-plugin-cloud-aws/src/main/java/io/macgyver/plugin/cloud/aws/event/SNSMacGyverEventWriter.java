@@ -18,7 +18,6 @@ import io.macgyver.core.event.MacGyverMessage;
 import reactor.bus.Event;
 import reactor.bus.EventBus;
 import reactor.bus.selector.Selectors;
-import rx.Observable;
 
 public class SNSMacGyverEventWriter implements ApplicationListener<ApplicationReadyEvent>{
 

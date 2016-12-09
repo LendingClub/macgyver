@@ -6,6 +6,7 @@ import java.net.UnknownHostException;
 import com.amazonaws.auth.AWSCredentials;
 import com.amazonaws.auth.AWSCredentialsProvider;
 import com.amazonaws.auth.STSAssumeRoleSessionCredentialsProvider;
+import com.amazonaws.services.securitytoken.AWSSecurityTokenServiceClient;
 
 import io.macgyver.core.service.ServiceRegistry;
 
@@ -40,8 +41,9 @@ public class AWSServiceClientAssumeRoleCredentialsProvider implements AWSCredent
 						roleSessionName = roleSessionName + "@" + host;
 					} catch (UnknownHostException e) {
 					}
-					stsAssumeRoleSessionCredentialsProvider = new STSAssumeRoleSessionCredentialsProvider(
-							sourceService.getCredentialsProvider(), roleArn, roleSessionName);
+					AWSSecurityTokenServiceClient sts = sourceService.createClient(AWSSecurityTokenServiceClient.class);
+					stsAssumeRoleSessionCredentialsProvider = new STSAssumeRoleSessionCredentialsProvider.Builder(
+							roleArn, roleSessionName).withStsClient(sts).build();
 				}
 			}
 		}
