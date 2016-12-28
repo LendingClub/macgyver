@@ -5,6 +5,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.lendingclub.reflex.predicate.Predicates;
+import org.lendingclub.reflex.queue.WorkQueue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
@@ -26,6 +27,8 @@ public class SNSMacGyverEventWriter implements ApplicationListener<ApplicationRe
 
 	AtomicBoolean enabled = new AtomicBoolean(true);
 
+	WorkQueue<MacGyverMessage> workQueue;
+	
 	public void setSNSClient(AmazonSNSAsyncClient client) {
 		withSNSClient(client);
 	}
@@ -73,8 +76,9 @@ public class SNSMacGyverEventWriter implements ApplicationListener<ApplicationRe
 		return Optional.ofNullable(topicArnRef.get());
 	}
 	public void subscribe(EventSystem eventSystem) {
+		workQueue = new WorkQueue<MacGyverMessage>().withCoreThreadPoolSize(2).withThreadName("SNSMacGyverEventWriter-%d");
 		
-		eventSystem.getObservable().filter(Predicates.type(MacGyverMessage.class)).subscribe(event -> {
+		workQueue.getObservable().subscribe(event -> {
 			try {
 				if (isEnabled()) {
 					PublishRequest request = new PublishRequest();
@@ -86,6 +90,8 @@ public class SNSMacGyverEventWriter implements ApplicationListener<ApplicationRe
 				logger.error("problem sending message to SNS: {}",e.toString());
 			}
 		});
+		
+		eventSystem.getObservable().filter(Predicates.type(MacGyverMessage.class)).subscribe(workQueue);
 	}
 	@Override
 	public void onApplicationEvent(ApplicationReadyEvent event) {

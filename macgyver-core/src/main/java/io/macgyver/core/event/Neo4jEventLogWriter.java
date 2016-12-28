@@ -18,6 +18,7 @@ import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 
 import org.lendingclub.reflex.predicate.Predicates;
+import org.lendingclub.reflex.queue.WorkQueue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
@@ -76,6 +77,8 @@ public class Neo4jEventLogWriter implements InitializingBean {
 
 	@Override
 	public void afterPropertiesSet() throws Exception {
+		
+		
 		Consumer<LogMessage> consumer = new Consumer<LogMessage>() {
 
 			@Override
@@ -110,8 +113,9 @@ public class Neo4jEventLogWriter implements InitializingBean {
 
 			}
 		};
-		
-		eventSystem.getObservable().filter(Predicates.type(LogMessage.class)).subscribe(consumer);
+		WorkQueue<LogMessage> workQueue = new WorkQueue<LogMessage>().withThreadName("Neo4jEventLogWriter-%d");
+		workQueue.getObservable().subscribe(consumer);
+		eventSystem.getObservable().filter(Predicates.type(LogMessage.class)).subscribe(workQueue);
 		
 
 	}
