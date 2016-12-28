@@ -17,6 +17,7 @@ import java.time.Instant;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 
+import org.lendingclub.reflex.predicate.Predicates;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
@@ -28,10 +29,8 @@ import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 
 import io.macgyver.neorx.rest.NeoRxClient;
-import reactor.bus.Event;
-import reactor.bus.EventBus;
-import reactor.bus.selector.Selectors;
-import reactor.fn.Consumer;
+import io.reactivex.functions.Consumer;
+
 
 public class Neo4jEventLogWriter implements InitializingBean {
 
@@ -43,7 +42,7 @@ public class Neo4jEventLogWriter implements InitializingBean {
 	NeoRxClient neo4j;
 
 	@Autowired
-	EventBus eventBus;
+	EventSystem eventSystem;
 
 	DateTimeFormatter utcFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSX").withZone(ZoneOffset.UTC);
 
@@ -77,27 +76,27 @@ public class Neo4jEventLogWriter implements InitializingBean {
 
 	@Override
 	public void afterPropertiesSet() throws Exception {
-		Consumer consumer = new Consumer<Event<LogMessage>>() {
+		Consumer<LogMessage> consumer = new Consumer<LogMessage>() {
 
 			@Override
-			public void accept(Event<LogMessage> logEvent) {
+			public void accept(LogMessage logEvent) {
 
 				logger.debug("writing log message: {}", logEvent);
 				if (neo4j != null) {
 					String labelClause = "";
-					String label = logEvent.getData().getLabel();
+					String label = logEvent.getLabel();
 					if (!Strings.isNullOrEmpty(label)) {
 						checkLabel(label);
 						labelClause = ":" + label;
 					}
-					JsonNode n = logEvent.getData().getPayload();
+					JsonNode n = logEvent.getPayload();
 
 					try {
 						if (n != null && n.isObject()) {
 							ObjectNode props = (ObjectNode) n;
 							props = props.deepCopy();
 
-							applyTimestamp(logEvent.getData().getTimestamp(), props);
+							applyTimestamp(logEvent.getTimestamp(), props);
 
 							String cypher = "create (x:EventLog" + labelClause + ") set x={props}";
 
@@ -111,7 +110,9 @@ public class Neo4jEventLogWriter implements InitializingBean {
 
 			}
 		};
-		eventBus.on(Selectors.T(LogMessage.class), consumer);
+		
+		eventSystem.getObservable().filter(Predicates.type(LogMessage.class)).subscribe(consumer);
+		
 
 	}
 

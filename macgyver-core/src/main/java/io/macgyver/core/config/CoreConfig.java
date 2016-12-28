@@ -27,7 +27,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.EnvironmentAware;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -79,16 +78,6 @@ import io.macgyver.core.service.config.SpringConfigLoader;
 import io.macgyver.neorx.rest.NeoRxClient;
 import io.macgyver.neorx.rest.NeoRxClientBuilder;
 import it.sauronsoftware.cron4j.Scheduler;
-import reactor.Environment;
-import reactor.bus.Event;
-import reactor.bus.EventBus;
-import reactor.bus.filter.PassThroughFilter;
-import reactor.bus.registry.Registries;
-import reactor.bus.registry.Registry;
-import reactor.bus.routing.ConsumerFilteringRouter;
-import reactor.bus.routing.Router;
-import reactor.core.dispatch.ThreadPoolExecutorDispatcher;
-import reactor.fn.Consumer;
 import springfox.documentation.builders.ApiInfoBuilder;
 import springfox.documentation.builders.PathSelectors;
 import springfox.documentation.builders.RequestHandlerSelectors;
@@ -276,42 +265,11 @@ public class CoreConfig implements EnvironmentAware {
 		return new TaskController();
 	}
 
-	@Bean
-	public Environment macReactorEnvironment() {
-		return Environment.initializeIfEmpty();
-	}
 
-	@Value("${REACTOR_THREAD_POOL_DISPATCHER_THREAD_COUNT:10}")
-	int reactorThreadCount;
 
-	@Value("${REACTOR_THREAD_POOL_DISPATCHER_BACKLOG:2048}")
-	int reactorBacklog;
 
-	@Bean
-	public ThreadPoolExecutorDispatcher macReactorThreadPoolDispatcher() {
 
-		logger.info("REACTOR_THREAD_POOL_DISPATCHER_THREAD_COUNT : {}", reactorThreadCount);
-		logger.info("REACTOR_THREAD_POOL_DISPATCHER_BACKLOG      : {}", reactorBacklog);
-		ThreadPoolExecutorDispatcher threadPoolDispatcher = new ThreadPoolExecutorDispatcher(reactorThreadCount,
-				reactorBacklog);
-		return threadPoolDispatcher;
-	}
-
-	@Bean
-	public EventBus macReactorEventBus() {
-
-		boolean useCache = false;
-		boolean cacheNotFound = false;
-
-		Registry<Object, Consumer<? extends Event<?>>> registry = Registries.create(useCache, cacheNotFound, null);
-
-		Router router = new ConsumerFilteringRouter(
-				new PassThroughFilter());
-
-		EventBus bus = new EventBus(registry, macReactorThreadPoolDispatcher(), router, null, null);
-
-		return bus;
-	}
+	
 
 	@Bean
 	public MacGyverEventPublisher macEventPublisher() {

@@ -20,19 +20,15 @@ import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
 
 import com.google.common.base.Optional;
+import com.google.common.eventbus.EventBus;
 
 import io.macgyver.core.Kernel.KernelStartedEvent;
 import io.macgyver.core.event.EventSystem;
-import reactor.bus.Event;
-import reactor.bus.EventBus;
 
 public class ContextRefreshApplicationListener implements
 		ApplicationListener<ContextRefreshedEvent> {
 
 
-
-	@Autowired
-	EventBus reactorBus;
 	
 	@Autowired
 	EventSystem eventSystem;
@@ -43,7 +39,6 @@ public class ContextRefreshApplicationListener implements
 	public void onApplicationEvent(ContextRefreshedEvent event) {
 
 		log.info("posting lifecycle event to EventSystem: {}", event);
-		reactorBus.notify(event,Event.wrap(event)); // deprecated
 		eventSystem.post(event);
 		
 		Optional<Throwable> e = Kernel.getInstance().getStartupError();
@@ -58,7 +53,6 @@ public class ContextRefreshApplicationListener implements
 		KernelStartedEvent kse = new Kernel.KernelStartedEvent(Kernel.getInstance());
 		
 		
-		reactorBus.notify(event,Event.wrap(kse)); //deprecated
 		eventSystem.post(kse);
 		log.info("event post complete");
 	}

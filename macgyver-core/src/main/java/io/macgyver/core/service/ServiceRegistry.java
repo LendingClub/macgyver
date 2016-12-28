@@ -43,8 +43,7 @@ import io.macgyver.core.ServiceNotFoundException;
 import io.macgyver.core.crypto.Crypto;
 import io.macgyver.core.event.EventSystem;
 import io.macgyver.core.service.config.CompositeConfigLoader;
-import reactor.bus.Event;
-import reactor.bus.EventBus;
+
 
 public class ServiceRegistry {
 
@@ -61,9 +60,6 @@ public class ServiceRegistry {
 
 	@Autowired
 	Crypto crypto;
-
-	@Autowired
-	EventBus eventBus;
 
 	@Autowired
 	EventSystem eventSystem;
@@ -230,9 +226,8 @@ public class ServiceRegistry {
 		if (eventSystem!=null && event!=null) {
 			eventSystem.post(event);
 		}
-		if (eventBus != null) {
-			// for eventBus
-			eventBus.notify(ServiceCreatedEvent.class, Event.wrap(event)); // deprecated
+		if (eventSystem != null) {
+			eventSystem.post(event);
 		}
 	}
 

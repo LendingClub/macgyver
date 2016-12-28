@@ -21,6 +21,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import org.assertj.core.api.Assertions;
 import org.assertj.core.data.Offset;
 import org.junit.Test;
+import org.lendingclub.reflex.predicate.Predicates;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -29,15 +30,14 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import io.macgyver.neorx.rest.NeoRxClient;
 import io.macgyver.test.MacGyverIntegrationTest;
-import reactor.bus.Event;
-import reactor.bus.EventBus;
-import reactor.bus.registry.Registration;
-import reactor.bus.selector.Selectors;
+import io.reactivex.disposables.Disposable;
+
 
 public class EventLoggerIntegrationTest extends MacGyverIntegrationTest {
 
+
 	@Autowired
-	EventBus eventBus;
+	EventSystem eventSystem;
 
 	@Autowired
 	EventLogger eventLogger;
@@ -48,14 +48,17 @@ public class EventLoggerIntegrationTest extends MacGyverIntegrationTest {
 	@Test
 	public void testIt() throws InterruptedException {
 	
-		Assertions.assertThat(eventBus).isNotNull();
+		Assertions.assertThat(eventSystem).isNotNull();
 		
 		CountDownLatch latch = new CountDownLatch(1);
-		AtomicReference<Event<LogMessage>> ref = new AtomicReference<Event<LogMessage>>(null);
-		Registration reg = eventBus.on(Selectors.T(LogMessage.class),(Event<LogMessage> x)->{
-			ref.set(x);
+		AtomicReference<LogMessage> ref = new AtomicReference<LogMessage>(null);
+		
+		Disposable disposable = eventSystem.getObservable().filter(Predicates.type(LogMessage.class)).subscribe(c -> {
+			ref.set((LogMessage)c);
 			latch.countDown();
+			
 		});
+	
 		
 		String id = UUID.randomUUID().toString();
 		
@@ -64,9 +67,10 @@ public class EventLoggerIntegrationTest extends MacGyverIntegrationTest {
 		Assertions.assertThat(latch.await(10, TimeUnit.SECONDS)).isTrue();
 		
 
-		Assertions.assertThat(ref.get().getData().getData().path("foo").asText()).isEqualTo("bar");
+		Assertions.assertThat(ref.get().getPayload().path("foo").asText()).isEqualTo("bar");
 	
-		eventBus.getConsumerRegistry().unregister(reg);
+		disposable.dispose();
+	
 		
 		
 		

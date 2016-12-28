@@ -20,7 +20,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import com.codahale.metrics.SharedMetricRegistries;
 
 import io.macgyver.test.MacGyverIntegrationTest;
-import reactor.core.Dispatcher;
 
 public class MacGyverMetricRegistryTest extends MacGyverIntegrationTest{
 

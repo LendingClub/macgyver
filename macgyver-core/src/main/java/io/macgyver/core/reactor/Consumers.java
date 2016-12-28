@@ -15,19 +15,21 @@ package io.macgyver.core.reactor;
 
 import org.slf4j.LoggerFactory;
 
-import reactor.fn.Consumer;
+import io.reactivex.functions.Consumer;
+
+
 
 public class Consumers {
 
 	
-	public static <T extends Consumer> T exceptionSafeConsumer(T consumer) {
+	public static <T extends Consumer<T>> T exceptionSafeConsumer(T consumer) {
 		
-		Consumer x = new Consumer() {
+		io.reactivex.functions.Consumer<T> x = new Consumer() {
 
 			@Override
 			public void accept(Object t) {
 				try {
-					consumer.accept(t);
+					consumer.accept((T)t);
 				}
 				catch (Exception e) {
 					LoggerFactory.getLogger(consumer.getClass()).warn("uncaught exception",e);
