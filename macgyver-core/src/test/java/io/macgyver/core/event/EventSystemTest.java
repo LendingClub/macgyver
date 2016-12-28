@@ -1,7 +1,18 @@
 package io.macgyver.core.event;
 
+import java.util.Collection;
+import java.util.List;
+import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.LinkedBlockingDeque;
+import java.util.concurrent.RejectedExecutionHandler;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.assertj.core.api.Assertions;
@@ -12,6 +23,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.eventbus.AllowConcurrentEvents;
+import com.google.common.eventbus.AsyncEventBus;
+import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 
 public class EventSystemTest {
@@ -112,5 +125,63 @@ public class EventSystemTest {
 		if (eventSystem!=null) {
 			eventSystem.shutdown();
 		}
+	}
+	
+
+
+	public void testExecutorBehavior() throws InterruptedException{
+	
+		
+		AtomicInteger receiveCount = new AtomicInteger(0);
+		Object obj = new Object() {
+			
+			
+			@Subscribe
+			@AllowConcurrentEvents
+			public void receive(String message) {
+				System.out.println("receive "+message+" on "+Thread.currentThread());
+			receiveCount.incrementAndGet();
+				try {
+					Thread.sleep(50);
+				}
+				catch (Exception e) {
+					
+				}
+			}
+		};
+		int count = 200;
+		
+		AtomicInteger x = new AtomicInteger(0);
+		RejectedExecutionHandler h = new ThreadPoolExecutor.DiscardPolicy() {
+			
+			int id = x.incrementAndGet();
+			@Override
+			public void rejectedExecution(Runnable r, ThreadPoolExecutor executor) {
+				System.out.println("rejected "+r+" for "+executor);
+				
+			}
+		
+		};
+		LinkedBlockingDeque<Runnable> queue = new LinkedBlockingDeque<>(1024);
+		ThreadPoolExecutor s = new ThreadPoolExecutor(3, 3, 10, TimeUnit.SECONDS, queue);
+		
+		
+		s.setRejectedExecutionHandler(h);
+		EventBus bus = new AsyncEventBus(s);
+		
+
+		bus.register(obj);
+		
+		
+		
+		for (int i=0; i<count; i++) {
+			bus.post("message-"+i);
+			System.out.println(s);
+		}
+		
+		Thread.sleep(25000);
+		
+		System.out.println("messages received: "+receiveCount.get());
+		
 	}
 }
