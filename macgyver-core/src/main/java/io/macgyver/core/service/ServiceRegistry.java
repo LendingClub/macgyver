@@ -228,7 +228,7 @@ public class ServiceRegistry {
 
 	public void publish(ServiceCreatedEvent event) {
 		if (eventSystem!=null && event!=null) {
-			eventSystem.publish(event);
+			eventSystem.post(event);
 		}
 		if (eventBus != null) {
 			// for eventBus

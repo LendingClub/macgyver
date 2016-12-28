@@ -44,7 +44,7 @@ public class EventSystem {
 		return executor;
 	}
 	
-	public void publish(Object event) {
+	public void post(Object event) {
 		Preconditions.checkArgument(event!=null, "event cannot be null");
 		getEventBus().post(event);
 	}

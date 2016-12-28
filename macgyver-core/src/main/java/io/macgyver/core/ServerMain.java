@@ -120,7 +120,7 @@ public class ServerMain {
 				.notify(ServerStartedEvent.class,Event.wrap(serverStartedEvent)); //deprecated
 		
 		Kernel.getApplicationContext().getBean(EventBus.class).notify(serverStartedEvent,Event.wrap(serverStartedEvent)); // deprecated
-		Kernel.getApplicationContext().getBean(EventSystem.class).publish(serverStartedEvent);
+		Kernel.getApplicationContext().getBean(EventSystem.class).post(serverStartedEvent);
 		logger.info("\n\n\n"+  
 		Bootstrap.getBannerText()+
 		"\n\n"+

@@ -44,7 +44,7 @@ public class ContextRefreshApplicationListener implements
 
 		log.info("posting lifecycle event to EventSystem: {}", event);
 		reactorBus.notify(event,Event.wrap(event)); // deprecated
-		eventSystem.publish(event);
+		eventSystem.post(event);
 		
 		Optional<Throwable> e = Kernel.getInstance().getStartupError();
 
@@ -59,7 +59,7 @@ public class ContextRefreshApplicationListener implements
 		
 		
 		reactorBus.notify(event,Event.wrap(kse)); //deprecated
-		eventSystem.publish(kse);
+		eventSystem.post(kse);
 		log.info("event post complete");
 	}
 

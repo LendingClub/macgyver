@@ -98,7 +98,7 @@ public class MacGyverEventPublisher {
 	
 	protected void publishObject(Object object) {
 		if (eventSystem!=null) {
-			eventSystem.publish(object);
+			eventSystem.post(object);
 		}
 		else {
 			logger.warn("eventSystem is not set");
