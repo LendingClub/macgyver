@@ -45,7 +45,7 @@ public class EventSystem {
 	}
 	
 	public void post(Object event) {
-		Preconditions.checkArgument(event!=null, "event cannot be null");
+		Preconditions.checkNotNull(event, "event cannot be null");
 		getEventBus().post(event);
 	}
 	
