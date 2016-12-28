@@ -55,8 +55,6 @@ public class ConfigTest extends MacGyverIntegrationTest {
 		Assertions.assertThat(applicationContext.getBean("macTaskStateManager")).isNotNull();
 		Assertions.assertThat(applicationContext.getBean("macScheduledTaskManager")).isNotNull();
 		Assertions.assertThat(applicationContext.getBean("macTaskController")).isNotNull();
-		Assertions.assertThat(applicationContext.getBean("macReactorEnvironment")).isNotNull();
-		Assertions.assertThat(applicationContext.getBean("macReactorEventBus")).isNotNull();
 		Assertions.assertThat(applicationContext.getBean("macEventPublisher")).isNotNull();
 		Assertions.assertThat(applicationContext.getBean("macAccessDecisionVoterList")).isNotNull();
 		Assertions.assertThat(applicationContext.getBean("macAccessDecisionManager")).isNotNull();

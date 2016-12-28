@@ -14,21 +14,22 @@
 package io.macgyver.plugin.config;
 
 
-import io.macgyver.jdbc.DataSourceFactory;
-import io.macgyver.jdbc.event.JdbcEventWriter;
-import reactor.bus.EventBus;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
+import io.macgyver.core.event.EventSystem;
+import io.macgyver.jdbc.DataSourceFactory;
+import io.macgyver.jdbc.event.JdbcEventWriter;
 
 
 
 @Configuration
 public class JdbcConfig {
 
+	
 	@Autowired
-	EventBus eventBus;
+	EventSystem eventSystem;
 	
 	@Bean
 	public DataSourceFactory dataSourceFactory() {
@@ -38,9 +39,9 @@ public class JdbcConfig {
 
 	@Bean
 	public JdbcEventWriter macJdbcEventLogWriter() {
-		JdbcEventWriter w = new JdbcEventWriter().withPrivateEventBus();
+		JdbcEventWriter w = new JdbcEventWriter().subscribe(eventSystem);
 		
-		w.subscribe(eventBus);
+
 		return w;
 	}
 }

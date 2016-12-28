@@ -22,6 +22,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
 
+import org.lendingclub.reflex.predicate.Predicates;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -34,14 +35,10 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
-import com.google.common.eventbus.Subscribe;
-import com.google.common.io.ByteStreams;
 
+import io.macgyver.core.event.EventSystem;
 import io.macgyver.core.event.MacGyverEventPublisher;
-import reactor.bus.EventBus;
-import reactor.bus.selector.Selectors;
 
 @Controller
 public class WebHookController {
@@ -52,7 +49,7 @@ public class WebHookController {
 	MacGyverEventPublisher eventPublisher;
 	
 	@Autowired
-	EventBus eventBus;
+	EventSystem eventSystem;
 	
 	static org.slf4j.Logger logger = LoggerFactory
 			.getLogger(WebHookController.class);
@@ -67,7 +64,7 @@ public class WebHookController {
 
 	@PostConstruct
 	public void registerLogger() {
-		eventBus.on(Selectors.T(GitHubWebHookMessage.class),c-> {
+		eventSystem.getObservable().filter(Predicates.type(GitHubWebHookMessage.class)).subscribe( c-> {
 			logger.info("received {}",c);
 		});
 	}

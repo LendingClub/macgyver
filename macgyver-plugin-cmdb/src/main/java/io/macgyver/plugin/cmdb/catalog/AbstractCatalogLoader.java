@@ -17,10 +17,8 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,23 +34,15 @@ import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.common.hash.Hashing;
 
-import ch.qos.logback.core.helpers.Transform;
-import io.macgyver.core.MacGyverException;
 import io.macgyver.core.event.MacGyverEventPublisher;
 import io.macgyver.core.resource.Resource;
-import io.macgyver.core.resource.ResourceMatcher;
 import io.macgyver.core.resource.ResourceProvider;
 import io.macgyver.core.service.ServiceRegistry;
 import io.macgyver.core.util.HJson;
 import io.macgyver.core.util.Neo4jUtil;
 import io.macgyver.neorx.rest.NeoRxClient;
-import io.macgyver.plugin.cmdb.catalog.AbstractCatalogLoader.EntitiyDefinitionWriter;
-import io.macgyver.plugin.cmdb.catalog.AbstractCatalogLoader.ProviderMapper;
-import io.macgyver.plugin.cmdb.catalog.AbstractCatalogLoader.ResourceMapper;
 import io.macgyver.plugin.git.GitRepository;
-import io.macgyver.plugin.git.GitRepositoryServiceFactory;
 import io.macgyver.plugin.git.GitResourceProvider;
-import reactor.bus.EventBus;
 import rx.Observable;
 import rx.functions.Action1;
 import rx.functions.Func1;
