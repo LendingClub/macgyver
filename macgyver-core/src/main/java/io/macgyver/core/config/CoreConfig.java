@@ -13,7 +13,8 @@
  */
 package io.macgyver.core.config;
 
-import java.awt.Composite;
+import static springfox.documentation.builders.PathSelectors.regex;
+
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.net.MalformedURLException;
@@ -56,6 +57,7 @@ import io.macgyver.core.cli.CLIDownloadController;
 import io.macgyver.core.cluster.ClusterManager;
 import io.macgyver.core.crypto.Crypto;
 import io.macgyver.core.event.EventLogger;
+import io.macgyver.core.event.EventSystem;
 import io.macgyver.core.event.MacGyverEventPublisher;
 import io.macgyver.core.event.Neo4jEventLogWriter;
 import io.macgyver.core.event.Slf4jEventWriter;
@@ -100,8 +102,6 @@ import springfox.documentation.spring.web.plugins.Docket;
 import springfox.documentation.swagger.web.ApiKeyVehicle;
 import springfox.documentation.swagger.web.SecurityConfiguration;
 import springfox.documentation.swagger.web.UiConfiguration;
-
-import static springfox.documentation.builders.PathSelectors.*;
 
 @Configuration
 public class CoreConfig implements EnvironmentAware {
@@ -441,5 +441,12 @@ public class CoreConfig implements EnvironmentAware {
 	@Bean
 	public Slf4jEventWriter macSlf4jEventWriter() {
 		return new Slf4jEventWriter();
+	}
+	
+
+	@Bean
+	public EventSystem macEventSystem() {
+		
+		return new EventSystem();
 	}
 }

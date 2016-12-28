@@ -34,6 +34,9 @@ public class MacGyverEventPublisher {
 	@Autowired
 	EventBus eventBus;
 
+	@Autowired
+	EventSystem eventSystem;
+	
 	static ObjectMapper mapper = new ObjectMapper();
 
 	public class MessageBuilder {
@@ -94,9 +97,14 @@ public class MacGyverEventPublisher {
 
 	
 	protected void publishObject(Object object) {
-		if (eventBus != null) {
-			
-			eventBus.notify(object, Event.wrap(object));
+		if (eventSystem!=null) {
+			eventSystem.publish(object);
+		}
+		else {
+			logger.warn("eventSystem is not set");
+		}
+		if (eventBus != null) {			
+			eventBus.notify(object, Event.wrap(object)); //deprecated
 		} else {
 			logger.warn("event not published because EventBus was not set");
 		}

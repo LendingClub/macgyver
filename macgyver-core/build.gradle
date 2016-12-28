@@ -79,7 +79,7 @@ dependencies {
     
 	compile "ch.qos.logback:logback-classic:${LOGBACK_VERSION}"
 
-
+    compile "org.lendingclub:reflex:${REFLEX_VERSION}"
     compile("org.springframework.boot:spring-boot-starter-web:${SPRING_BOOT_VERSION}")
     compile("org.springframework.boot:spring-boot-starter-remote-shell:${SPRING_BOOT_VERSION}")
     
@@ -162,7 +162,7 @@ processResources.doLast() {
 
 }
 
-task showRepos << {
+task showRepos  {
     println "All repos:"
     println repositories.collect { it.name }
 }
