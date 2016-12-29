@@ -2,6 +2,7 @@ package io.macgyver.core.event;
 
 import javax.annotation.PostConstruct;
 
+import org.lendingclub.reflex.consumer.Consumers;
 import org.lendingclub.reflex.predicate.Predicates;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,10 +18,10 @@ public class Slf4jEventWriter {
 
 	@PostConstruct
 	public void subscribe() {
-		eventSystem.getObservable().filter(Predicates.type(MacGyverMessage.class)).subscribe(x-> {
+		eventSystem.getObservable().filter(Predicates.type(MacGyverMessage.class)).subscribe(Consumers.safeConsumer(x-> {
 			if (logger.isDebugEnabled()) {
 				logger.debug("logging event:\n {}",JsonNodes.pretty(((MacGyverMessage)x).getEnvelope()));
 			}
-		});
+		}));
 	}
 }

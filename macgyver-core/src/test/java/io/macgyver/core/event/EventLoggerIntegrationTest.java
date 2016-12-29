@@ -21,6 +21,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import org.assertj.core.api.Assertions;
 import org.assertj.core.data.Offset;
 import org.junit.Test;
+import org.lendingclub.reflex.consumer.Consumers;
 import org.lendingclub.reflex.predicate.Predicates;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -53,11 +54,11 @@ public class EventLoggerIntegrationTest extends MacGyverIntegrationTest {
 		CountDownLatch latch = new CountDownLatch(1);
 		AtomicReference<LogMessage> ref = new AtomicReference<LogMessage>(null);
 		
-		Disposable disposable = eventSystem.getObservable().filter(Predicates.type(LogMessage.class)).subscribe(c -> {
+		Disposable disposable = eventSystem.getObservable().filter(Predicates.type(LogMessage.class)).subscribe(Consumers.safeConsumer(c -> {
 			ref.set((LogMessage)c);
 			latch.countDown();
 			
-		});
+		}));
 	
 		
 		String id = UUID.randomUUID().toString();

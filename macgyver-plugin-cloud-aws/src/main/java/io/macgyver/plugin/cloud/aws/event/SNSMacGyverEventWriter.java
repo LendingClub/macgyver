@@ -4,6 +4,7 @@ import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
+import org.lendingclub.reflex.consumer.Consumers;
 import org.lendingclub.reflex.predicate.Predicates;
 import org.lendingclub.reflex.queue.WorkQueue;
 import org.slf4j.Logger;
@@ -78,7 +79,7 @@ public class SNSMacGyverEventWriter implements ApplicationListener<ApplicationRe
 	public void subscribe(EventSystem eventSystem) {
 		workQueue = new WorkQueue<MacGyverMessage>().withCoreThreadPoolSize(2).withThreadName("SNSMacGyverEventWriter-%d");
 		
-		workQueue.getObservable().subscribe(event -> {
+		workQueue.getObservable().subscribe(Consumers.safeConsumer(event -> {
 			try {
 				if (isEnabled()) {
 					PublishRequest request = new PublishRequest();
@@ -89,9 +90,9 @@ public class SNSMacGyverEventWriter implements ApplicationListener<ApplicationRe
 			} catch (Exception e) {
 				logger.error("problem sending message to SNS: {}",e.toString());
 			}
-		});
+		}));
 		
-		eventSystem.getObservable().filter(Predicates.type(MacGyverMessage.class)).subscribe(workQueue);
+		eventSystem.getObservable().filter(Predicates.type(MacGyverMessage.class)).subscribe(Consumers.safeConsumer(workQueue));
 	}
 	@Override
 	public void onApplicationEvent(ApplicationReadyEvent event) {

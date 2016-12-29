@@ -4,6 +4,7 @@ import java.sql.Timestamp;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
+import org.lendingclub.reflex.consumer.Consumers;
 import org.lendingclub.reflex.predicate.FlatMapFilters;
 import org.lendingclub.reflex.queue.WorkQueue;
 import org.slf4j.Logger;
@@ -75,9 +76,9 @@ public class JdbcEventWriter implements ApplicationListener<ApplicationReadyEven
 	public JdbcEventWriter subscribe(EventSystem eventSystem) {
 		this.eventSystem = eventSystem;
 		this.workQueue = new WorkQueue<MacGyverMessage>().withCoreThreadPoolSize(2).withThreadName("JdbcEventWriter-%d");
-		this.workQueue.getObservable().subscribe(new LocalConsumer());
+		this.workQueue.getObservable().subscribe(Consumers.safeConsumer(new LocalConsumer()));
 		
-		this.eventSystem.getObservable().flatMap(FlatMapFilters.type(MacGyverMessage.class)).subscribe(workQueue);
+		this.eventSystem.getObservable().flatMap(FlatMapFilters.type(MacGyverMessage.class)).subscribe(Consumers.safeConsumer(workQueue));
 
 		return this;
 	}
