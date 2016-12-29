@@ -111,7 +111,7 @@ public class JdbcEventWriterTest extends MacGyverIntegrationTest {
 		
 		System.out.println("XX"+JsonNodes.pretty(envelope));
 		Assertions.assertThat(envelope.has("eventId")).isTrue();
-		Assertions.assertThat(envelope.get("eventTs").asLong()).isCloseTo(System.currentTimeMillis(), Offset.offset(5000L));
+		Assertions.assertThat(envelope.get("eventTs").asLong()).isCloseTo(System.currentTimeMillis(), Offset.offset(30000L));
 		Assertions.assertThat(envelope.path("data").path("hello").asText()).isEqualTo("world");
 		Assertions.assertThat(envelope.get("data")).isSameAs(m.getPayload());
 		Assertions.assertThat(m.getPayload().size()).isEqualTo(1);
