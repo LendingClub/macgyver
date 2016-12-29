@@ -106,7 +106,7 @@ public class JdbcEventWriterTest extends MacGyverIntegrationTest {
 		MacGyverMessage m = publisher.createMessage().withMessageType(TestMessageType.class).withAttribute("hello", "world").publish();
 
 		Assertions.assertThat(latch.await(10, TimeUnit.SECONDS)).isTrue();
-		
+		Thread.sleep(5000);
 		JsonNode envelope = m.getEnvelope();
 		
 		System.out.println("XX"+JsonNodes.pretty(envelope));

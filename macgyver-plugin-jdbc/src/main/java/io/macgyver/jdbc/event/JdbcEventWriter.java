@@ -113,7 +113,7 @@ public class JdbcEventWriter implements ApplicationListener<ApplicationReadyEven
 				return;
 			}
 
-			System.out.println("DATA: "+data);
+		
 			String id = data.path("eventId").asText();
 			if (Strings.isNullOrEmpty(id)) {
 				
