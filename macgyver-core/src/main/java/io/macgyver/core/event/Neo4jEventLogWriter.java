@@ -117,7 +117,7 @@ public class Neo4jEventLogWriter implements InitializingBean {
 		};
 		WorkQueue<LogMessage> workQueue = new WorkQueue<LogMessage>().withThreadName("Neo4jEventLogWriter-%d");
 		workQueue.getObservable().subscribe(Consumers.safeConsumer(consumer));
-		eventSystem.getObservable().filter(Predicates.type(LogMessage.class)).subscribe(Consumers.safeConsumer(workQueue));
+		eventSystem.getObservable().filter(Predicates.type(LogMessage.class)).subscribe(Consumers.safeObserver(workQueue));
 		
 	}
 

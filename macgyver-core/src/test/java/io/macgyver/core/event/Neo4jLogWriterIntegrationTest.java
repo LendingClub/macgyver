@@ -64,13 +64,13 @@ public class Neo4jLogWriterIntegrationTest extends MacGyverIntegrationTest {
 		String id = UUID.randomUUID().toString();
 		((LogMessage) eventLogger.event().withAttribute("foo", id)).log();
 
-		Thread.sleep(500L);
+		Thread.sleep(5000L);
 
 		List<JsonNode> x = neo4j.execCypherAsList("match (x:EventLog) where x.foo={foo} return x", "foo", id);
-
-		Assertions.assertThat(x.size() == 1);
+	
+		Assertions.assertThat(x.size()).isEqualTo(1);
 		
-		Assertions.assertThat(x.get(0).path("eventTs").asLong()).isCloseTo(System.currentTimeMillis(), Offset.offset(2000L));
+		Assertions.assertThat(x.get(0).path("eventTs").asLong()).isCloseTo(System.currentTimeMillis(), Offset.offset(10000L));
 		Assertions.assertThat(x.get(0).path("eventDate").asText()).startsWith("20").endsWith("Z");
 		Assertions.assertThat(x.get(0).path("foo").asText()).isEqualTo(id);
 		

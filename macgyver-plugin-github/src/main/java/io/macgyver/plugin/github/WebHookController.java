@@ -44,30 +44,29 @@ import io.macgyver.core.event.MacGyverEventPublisher;
 @Controller
 public class WebHookController {
 
-	public static final int WEBHOOK_MAX_BYTES_DEFAULT=500 * 1024;
-	
+	public static final int WEBHOOK_MAX_BYTES_DEFAULT = 500 * 1024;
+
 	@Autowired
 	MacGyverEventPublisher eventPublisher;
-	
+
 	@Autowired
 	EventSystem eventSystem;
-	
+
 	static org.slf4j.Logger logger = LoggerFactory
 			.getLogger(WebHookController.class);
 
 	ObjectMapper mapper = new ObjectMapper();
 
 	List<WebHookAuthenticator> authenticatorList = new CopyOnWriteArrayList<>();
-	
-	int webhookMaxBytes = WEBHOOK_MAX_BYTES_DEFAULT;
-	
 
+	int webhookMaxBytes = WEBHOOK_MAX_BYTES_DEFAULT;
 
 	@PostConstruct
 	public void registerLogger() {
-		eventSystem.getObservable().filter(Predicates.type(GitHubWebHookMessage.class)).subscribe( Consumers.safeConsumer(c-> {
-			logger.info("received {}",c);
-		}));
+		eventSystem.getObservable().filter(Predicates.type(GitHubWebHookMessage.class)).subscribe(
+				Consumers.safeConsumer(c -> {
+					logger.info("received {}", c);
+				}));
 	}
 
 	@RequestMapping(value = "/api/plugin/github/webhook", method = RequestMethod.POST, consumes = "application/json")
@@ -76,22 +75,20 @@ public class WebHookController {
 	public ResponseEntity<JsonNode> processHook(HttpServletRequest request)
 			throws IOException, InvalidKeyException, NoSuchAlgorithmException {
 
-		if (request.getContentLength() >webhookMaxBytes) {
+		if (request.getContentLength() > webhookMaxBytes) {
 			JsonNode returnNode = new ObjectMapper().createObjectNode()
 					.put("success", "false")
 					.put("error", "message too large");
 			return new ResponseEntity<JsonNode>(returnNode,
-					HttpStatus.UNAUTHORIZED);	
+					HttpStatus.UNAUTHORIZED);
 		}
-		
-		
 
 		GitHubWebHookMessage event = new GitHubWebHookMessage(request);
-	
+
 		if (isAuthenticated(event)) {
-		
+
 			eventPublisher.createMessage().withMessage(event).publish();
-			
+
 			JsonNode returnNode = new ObjectMapper().createObjectNode().put(
 					"success", "true");
 			return new ResponseEntity<JsonNode>(returnNode, HttpStatus.OK);
@@ -106,16 +103,17 @@ public class WebHookController {
 	}
 
 	boolean isAuthenticated(GitHubWebHookMessage event) {
-		
-		if (authenticatorList==null || authenticatorList.isEmpty()) {
-			// if no authenticators are set up, assume we want to just trust everything
+
+		if (authenticatorList == null || authenticatorList.isEmpty()) {
+			// if no authenticators are set up, assume we want to just trust
+			// everything
 			return true;
 		}
-		
-		for (WebHookAuthenticator auth: authenticatorList) {
-		
+
+		for (WebHookAuthenticator auth : authenticatorList) {
+
 			java.util.Optional<Boolean> b = auth.authenticate(event);
-			if (b.isPresent() && (! b.get().booleanValue())) {
+			if (b.isPresent() && (!b.get().booleanValue())) {
 				return b.get();
 			}
 		}
