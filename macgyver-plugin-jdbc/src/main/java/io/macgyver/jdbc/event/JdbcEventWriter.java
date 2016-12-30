@@ -78,7 +78,7 @@ public class JdbcEventWriter implements ApplicationListener<ApplicationReadyEven
 		this.workQueue = new WorkQueue<MacGyverMessage>().withCoreThreadPoolSize(2).withThreadName("JdbcEventWriter-%d");
 		this.workQueue.getObservable().subscribe(Consumers.safeConsumer(new LocalConsumer()));
 		
-		this.eventSystem.getObservable().flatMap(FlatMapFilters.type(MacGyverMessage.class)).subscribe(Consumers.safeConsumer(workQueue));
+		this.eventSystem.getObservable().flatMap(FlatMapFilters.type(MacGyverMessage.class)).subscribe(Consumers.safeObserver(workQueue));
 
 		return this;
 	}

@@ -92,7 +92,7 @@ public class SNSMacGyverEventWriter implements ApplicationListener<ApplicationRe
 			}
 		}));
 		
-		eventSystem.getObservable().filter(Predicates.type(MacGyverMessage.class)).subscribe(Consumers.safeConsumer(workQueue));
+		eventSystem.getObservable().filter(Predicates.type(MacGyverMessage.class)).subscribe(Consumers.safeObserver(workQueue));
 	}
 	@Override
 	public void onApplicationEvent(ApplicationReadyEvent event) {
