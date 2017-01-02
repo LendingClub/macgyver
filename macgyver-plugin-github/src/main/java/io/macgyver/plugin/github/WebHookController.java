@@ -22,8 +22,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
 
-import org.lendingclub.reflex.consumer.Consumers;
-import org.lendingclub.reflex.predicate.Predicates;
+import org.lendingclub.reflex.operator.ExceptionHandlers;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -63,8 +62,8 @@ public class WebHookController {
 
 	@PostConstruct
 	public void registerLogger() {
-		eventSystem.getObservable().filter(Predicates.type(GitHubWebHookMessage.class)).subscribe(
-				Consumers.safeConsumer(c -> {
+		eventSystem.newObservable(GitHubWebHookMessage.class).subscribe(
+				ExceptionHandlers.safeConsumer(c -> {
 					logger.info("received {}", c);
 				}));
 	}

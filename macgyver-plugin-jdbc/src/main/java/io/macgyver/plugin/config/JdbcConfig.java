@@ -39,7 +39,7 @@ public class JdbcConfig {
 
 	@Bean
 	public JdbcEventWriter macJdbcEventLogWriter() {
-		JdbcEventWriter w = new JdbcEventWriter().subscribe(eventSystem);
+		JdbcEventWriter w = new JdbcEventWriter();
 		
 
 		return w;

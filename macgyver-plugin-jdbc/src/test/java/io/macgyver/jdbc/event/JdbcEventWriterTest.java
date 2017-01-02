@@ -17,14 +17,13 @@ import java.io.IOException;
 import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import org.assertj.core.api.Assertions;
 import org.assertj.core.data.Offset;
 import org.junit.Before;
 import org.junit.Test;
-import org.lendingclub.reflex.predicate.FlatMapFilters;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -41,6 +40,7 @@ import io.macgyver.test.MacGyverIntegrationTest;
 
 public class JdbcEventWriterTest extends MacGyverIntegrationTest {
 
+	Logger logger = LoggerFactory.getLogger(JdbcEventWriterTest.class);
 	static Database db;
 
 	@Autowired
@@ -59,50 +59,47 @@ public class JdbcEventWriterTest extends MacGyverIntegrationTest {
 	public void setupTempDB() {
 
 		if (db == null) {
-			db = Database.builder().url("jdbc:h2:mem:event_test").pool(1, 1).build();
+			db = Database.builder().url("jdbc:h2:mem:event_test").pool(10,10).build();
 
-			try {
+			
 				db.update(JdbcEventWriter.GENERIC_DDL).execute();
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
+			
 		}
 
 		eventWriter.withDatabase(db);
 
+	
 	}
 
 	@Test
 	public void test() throws Exception {
-
+	
 		int count = 100;
-		JdbcEventWriter writer = new JdbcEventWriter().withDatabase(db).subscribe(eventSystem);
-		CountDownLatch latch = new CountDownLatch(count);
-		
-		eventSystem.getObservable().flatMap(FlatMapFilters.type(MacGyverMessage.class)).subscribe(c-> {
-			System.out.println("Received "+c);
-			latch.countDown();
-		});
+	
 		
 		String uuid = UUID.randomUUID().toString(); 
 		for (int i = 0; i < count; i++) {
 			MacGyverMessage m = new MacGyverMessage();
-			m.withAttribute("test", "hello " + uuid+" "+1);
+			m.withAttribute("test", "hello " + uuid+" "+i);
 
-			writer.writeAsync(m);
+			eventSystem.post(m);
 	
 		}
 
-		Assertions.assertThat(latch.await(120, TimeUnit.SECONDS)).isTrue();
-
-		CountDownLatch latch2 = new CountDownLatch(count);
-		db.select("select * from event where JSON_DATA like '%"+uuid+"%'").get(new JacksonRxJdbcResultSetMapper()).forEach(it -> {
-			System.out.println(it);
-			latch2.countDown();
-		});
-		
-		Assertions.assertThat(latch2.await(120, TimeUnit.SECONDS)).isTrue();
 	
+		long t0= System.currentTimeMillis();
+		boolean ok = false;
+		while ((!ok) && System.currentTimeMillis()-t0<60000) {
+			int c = db.select("select * from event where JSON_DATA like '%"+uuid+"%'").get(new JacksonRxJdbcResultSetMapper()).toList().toBlocking().first().size();
+			if (c==count) {
+				ok=true;
+			}
+			logger.info("count: "+c);
+			Thread.sleep(10);
+		}
+		
+		Assertions.assertThat(ok).isTrue();
+
 	}
 
 	public static class TestMessageType extends MacGyverMessage {
@@ -112,7 +109,7 @@ public class JdbcEventWriterTest extends MacGyverIntegrationTest {
 	public void testX() throws InterruptedException, IOException, JsonProcessingException{
 		
 		CountDownLatch latch = new CountDownLatch(1);
-		eventSystem.getObservable().flatMap(FlatMapFilters.type(MacGyverMessage.class)).subscribe(x-> {
+		eventSystem.newObservable(MacGyverMessage.class).subscribe(x-> {
 			
 			if (x.getPayload().path("hello").asText().equals("world")) {
 				latch.countDown();
@@ -127,10 +124,9 @@ public class JdbcEventWriterTest extends MacGyverIntegrationTest {
 		MacGyverMessage m = publisher.createMessage().withMessageType(TestMessageType.class).withAttribute("hello", "world").publish();
 
 		Assertions.assertThat(latch.await(10, TimeUnit.SECONDS)).isTrue();
-		Thread.sleep(5000);
+		//Thread.sleep(5000);
 		JsonNode envelope = m.getEnvelope();
-		
-		System.out.println("XX"+JsonNodes.pretty(envelope));
+	
 		Assertions.assertThat(envelope.has("eventId")).isTrue();
 		Assertions.assertThat(envelope.get("eventTs").asLong()).isCloseTo(System.currentTimeMillis(), Offset.offset(30000L));
 		Assertions.assertThat(envelope.path("data").path("hello").asText()).isEqualTo("world");

@@ -13,6 +13,7 @@
  */
 package io.macgyver.core.event;
 
+import java.security.SecureRandom;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -97,13 +98,16 @@ public class EventSystemTest {
 	public void testConcurrency() throws Exception {
 		int count = 10;
 		CountDownLatch latch = new CountDownLatch(count*2);
-		eventSystem.getObservable().subscribe(c->{
+		SecureRandom r = SecureRandom.getInstance("sha1prng");
+		
+		eventSystem.newObservable().subscribe(c->{
 			logger.info("subscriber1 - {}",c);
+			Thread.sleep(Math.abs(r.nextLong()%1000));
 			latch.countDown();
 		});
-		eventSystem.getObservable().subscribe(c->{
+		eventSystem.newObservable().subscribe(c->{
 			logger.info("subscriber2 - {}", c);
-			Thread.sleep(1000);
+			Thread.sleep(Math.abs(r.nextLong()%1000));
 			latch.countDown();
 		});
 		
@@ -115,11 +119,10 @@ public class EventSystemTest {
 		}
 		long t1 = System.currentTimeMillis();
 		
-		Assertions.assertThat(latch.await(10, TimeUnit.SECONDS)).isTrue();
+		Assertions.assertThat(latch.await(30, TimeUnit.SECONDS)).isTrue();
 		long t2 = System.currentTimeMillis();
 		
-		Assertions.assertThat(t2-t0).isLessThan(3000);
-
+	
 	}
 	
 	@Test(expected=NullPointerException.class)

@@ -16,10 +16,10 @@ package io.macgyver.core.event;
 import java.time.Instant;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
 
-import org.lendingclub.reflex.consumer.Consumers;
-import org.lendingclub.reflex.predicate.Predicates;
-import org.lendingclub.reflex.queue.WorkQueue;
+import org.lendingclub.reflex.concurrent.ConcurrentSubscribers;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
@@ -29,11 +29,10 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
 
 import io.macgyver.neorx.rest.NeoRxClient;
-import io.reactivex.Observer;
 import io.reactivex.functions.Consumer;
-
 
 public class Neo4jEventLogWriter implements InitializingBean {
 
@@ -79,8 +78,7 @@ public class Neo4jEventLogWriter implements InitializingBean {
 
 	@Override
 	public void afterPropertiesSet() throws Exception {
-		
-		
+
 		Consumer<LogMessage> consumer = new Consumer<LogMessage>() {
 
 			@Override
@@ -115,10 +113,10 @@ public class Neo4jEventLogWriter implements InitializingBean {
 
 			}
 		};
-		WorkQueue<LogMessage> workQueue = new WorkQueue<LogMessage>().withThreadName("Neo4jEventLogWriter-%d");
-		workQueue.getObservable().subscribe(Consumers.safeConsumer(consumer));
-		eventSystem.getObservable().filter(Predicates.type(LogMessage.class)).subscribe(Consumers.safeObserver(workQueue));
-		
+		ThreadFactory tf = new ThreadFactoryBuilder().setNameFormat("Neo4jEventLogWriter-%d").setDaemon(true).build();
+		ConcurrentSubscribers.subscribeParallel(eventSystem.newObservable(LogMessage.class),
+				Executors.newFixedThreadPool(2, tf), org.lendingclub.reflex.operator.ExceptionHandlers.safeConsumer(consumer));
+
 	}
 
 }

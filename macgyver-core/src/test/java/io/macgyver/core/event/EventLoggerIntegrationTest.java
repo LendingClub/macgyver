@@ -21,13 +21,11 @@ import java.util.concurrent.atomic.AtomicReference;
 import org.assertj.core.api.Assertions;
 import org.assertj.core.data.Offset;
 import org.junit.Test;
-import org.lendingclub.reflex.consumer.Consumers;
-import org.lendingclub.reflex.predicate.Predicates;
+import org.lendingclub.reflex.operator.ExceptionHandlers;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-
 
 import io.macgyver.neorx.rest.NeoRxClient;
 import io.macgyver.test.MacGyverIntegrationTest;
@@ -54,7 +52,7 @@ public class EventLoggerIntegrationTest extends MacGyverIntegrationTest {
 		CountDownLatch latch = new CountDownLatch(1);
 		AtomicReference<LogMessage> ref = new AtomicReference<LogMessage>(null);
 		
-		Disposable disposable = eventSystem.getObservable().filter(Predicates.type(LogMessage.class)).subscribe(Consumers.safeConsumer(c -> {
+		Disposable disposable = eventSystem.newObservable(LogMessage.class).subscribe(ExceptionHandlers.safeConsumer(c -> {
 			ref.set((LogMessage)c);
 			latch.countDown();
 			

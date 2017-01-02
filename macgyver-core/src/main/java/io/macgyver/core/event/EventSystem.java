@@ -14,7 +14,6 @@
 package io.macgyver.core.event;
 
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -22,7 +21,7 @@ import java.util.concurrent.TimeUnit;
 
 import javax.annotation.PostConstruct;
 
-import org.lendingclub.reflex.guava.EventBusAdapter;
+import org.lendingclub.reflex.eventbus.EventBusAdapter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -39,7 +38,7 @@ public class EventSystem {
 
 	Logger logger = LoggerFactory.getLogger(EventSystem.class);
 	
-	Observable<Object> observable;
+
 	ThreadPoolExecutor executor;
 	
 	@Value("${MACGYVER_EVENT_SYSTEM_CORE_THREAD_COUNT:30}")
@@ -52,11 +51,19 @@ public class EventSystem {
 	@Value("${MACGYVER_EVENT_SYSTEM_BACKLOG:2048}")
 	int backlog = 2048;
 	
-	EventBusAdapter<Object> eventBusAdapter;
 	EventBus eventBus;
 	
-	public Observable<Object> getObservable() {
-		return observable;
+	public <T> Observable<T> newObservable(Class<? extends T> clazz) {
+		
+		return EventBusAdapter.toObservable(eventBus, clazz);
+	}
+	public Observable<Object> newObservable() {
+		return EventBusAdapter.toObservable(eventBus);
+	}
+	
+	@Deprecated
+	public Observable<Object> getObservable() {	
+		return newObservable();
 	}
 
 	public EventBus getEventBus() {
@@ -84,7 +91,7 @@ public class EventSystem {
 	@SuppressWarnings("unchecked")
 	@PostConstruct
 	public synchronized void init() {
-		if (eventBusAdapter == null) {
+		if (executor == null) {
 			logger.info("initializing {} with {} threads",getClass().getName(),coreThreadCount);
 			ThreadFactory threadFactory = new ThreadFactoryBuilder()
 					.setDaemon(true).setNameFormat("EventSystem-%d").build();
@@ -96,8 +103,7 @@ public class EventSystem {
 	
 			eventBus = new AsyncEventBus("MacGyverEventBus",executor);
 	
-			eventBusAdapter = (EventBusAdapter<Object>) EventBusAdapter.createAdapter(eventBus);
-			observable = eventBusAdapter.getObservable();
+		
 		}
 		else {
 			throw new IllegalStateException("init() can only be called once");
