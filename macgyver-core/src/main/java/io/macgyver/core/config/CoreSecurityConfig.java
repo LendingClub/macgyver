@@ -22,6 +22,7 @@ import io.macgyver.core.auth.LogOnlyAccessDecisionVoter;
 import io.macgyver.core.auth.MacGyverAccessDecisionManager;
 
 import io.macgyver.core.auth.ApiTokenController;
+import io.macgyver.core.auth.AuthorizationManager;
 import io.macgyver.core.auth.ApiTokenAuthenticationFilter;
 import io.macgyver.core.auth.ApiTokenAuthenticationProvider;
 
@@ -188,4 +189,8 @@ public class CoreSecurityConfig extends WebSecurityConfigurerAdapter {
 	}
 
 
+	@Bean
+	public AuthorizationManager macAuthorizationManager() {
+		return new AuthorizationManager();
+	}
 }
