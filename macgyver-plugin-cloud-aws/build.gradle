@@ -22,6 +22,7 @@ dependencies {
 	compile "com.amazonaws:aws-java-sdk:${AWS_VERSION}"
     compile "com.amazonaws:amazon-kinesis-client:${AWS_KINESIS_CLIENT_VERSION}"
 
+	compile "org.lendingclub.projector:projector-aws:${PROJECTOR_VERSION}"
     testCompile project(':macgyver-test')
 
 }

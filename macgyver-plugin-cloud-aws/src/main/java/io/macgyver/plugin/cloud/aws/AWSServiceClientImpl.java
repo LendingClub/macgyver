@@ -17,13 +17,18 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Optional;
 
+import org.lendingclub.projector.aws.AWSScannerBuilder;
+import org.lendingclub.projector.core.Projector;
+
 import com.amazonaws.AmazonWebServiceClient;
 import com.amazonaws.auth.AWSCredentialsProvider;
+import com.amazonaws.client.builder.AwsClientBuilder;
 import com.amazonaws.regions.Region;
 import com.amazonaws.regions.Regions;
 import com.amazonaws.services.ec2.AmazonEC2Client;
 import com.amazonaws.services.s3.AmazonS3Client;
 
+import io.macgyver.core.Kernel;
 import io.macgyver.core.MacGyverException;
 
 public class AWSServiceClientImpl implements AWSServiceClient {
@@ -128,4 +133,8 @@ public class AWSServiceClientImpl implements AWSServiceClient {
 		this.accountId = id;
 	}
 
+	public AWSScannerBuilder createScannerBuilder() {
+		// No need to set region or account.  Account will be determined at runtime.  Region will be selected by the caller.
+		return Kernel.getApplicationContext().getBean(Projector.class).createBuilder(AWSScannerBuilder.class).withCredentials(getCredentialsProvider());
+	}
 }

@@ -13,24 +13,15 @@
  */
 package io.macgyver.plugin.ci.jenkins;
 
-import io.macgyver.neorx.rest.NeoRxClient;
-import io.macgyver.neorx.rest.NeoRxClientBuilder;
-import io.macgyver.okrest3.OkRestResponse;
-import io.macgyver.plugin.ci.jenkins.decorators.GitHubDecorator;
-
-import java.io.IOException;
-
 import org.assertj.core.api.Assertions;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.squareup.okhttp.mockwebserver.MockResponse;
-import com.squareup.okhttp.mockwebserver.RecordedRequest;
 import com.squareup.okhttp.mockwebserver.MockWebServer;
+import com.squareup.okhttp.mockwebserver.RecordedRequest;
 
 public class JenkinsClientImplTest {
 
@@ -123,24 +114,7 @@ public class JenkinsClientImplTest {
 
 	}
 
-	@Test
-	@Ignore
-	public void testReal() throws InterruptedException,
-			JsonProcessingException, IOException {
 
-		NeoRxClient neo4j = new NeoRxClientBuilder().build();
-
-		JenkinsClient c = new JenkinsClientBuilder()
-				.url("https://jenkins.example.com/")
-				.credentials("username", "password").build();
-	
-
-		JenkinsScanner s = new JenkinsScanner(neo4j, c);	
-	
-		s.addDecorationAction(new GitHubDecorator());
-		
-		s.scan();
-	}
 }
 	
 

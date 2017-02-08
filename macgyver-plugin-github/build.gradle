@@ -16,7 +16,7 @@ configurations {
 dependencies {
 
     compile 'org.kohsuke:github-api:1.68'
-	
+	compile "org.lendingclub.projector:projector-github:${PROJECTOR_VERSION}"
     testCompile project(':macgyver-test')
 	 compile project(':macgyver-core')
 	 compile project(':macgyver-plugin-git')

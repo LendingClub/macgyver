@@ -13,8 +13,17 @@
  */
 package io.macgyver.plugin.ci.jenkins;
 
+import java.util.Set;
+
+import org.lendingclub.projector.core.Projector;
+import org.lendingclub.projector.jenkins.JenkinsScannerBuilder;
+
+import com.google.common.base.Strings;
+
+import io.macgyver.core.Kernel;
 import io.macgyver.core.service.ServiceDefinition;
 import io.macgyver.core.service.ServiceFactory;
+import io.macgyver.core.service.ServiceRegistry;
 
 public class JenkinsServiceFactory extends ServiceFactory<JenkinsClient> {
 
@@ -31,6 +40,35 @@ public class JenkinsServiceFactory extends ServiceFactory<JenkinsClient> {
 				"password"));
 
 		return c;
+	}
+
+	@Override
+	protected void doCreateCollaboratorInstances(ServiceRegistry registry, ServiceDefinition primaryDefinition,
+			Object primaryBean) {
+		JenkinsScannerBuilder builder = Kernel.getApplicationContext().getBean(Projector.class).createBuilder(JenkinsScannerBuilder.class)
+		.withUrl(primaryDefinition.getProperty("url"));
+		
+		String username = primaryDefinition.getProperty("username");
+		String password = primaryDefinition.getProperty("password");
+		
+		if (!Strings.isNullOrEmpty(username)) {
+			builder = builder.withUsername(username);
+		}
+		if (!Strings.isNullOrEmpty(password)) {
+			builder = builder.withPassword(password);
+		}
+		org.lendingclub.projector.jenkins.JenkinsScanner scanner = builder.build();
+		
+		registry.registerCollaborator(primaryDefinition.getName()+"Scanner", scanner);
+	}
+
+
+	@Override
+	public void doCreateCollaboratorDefinitions(Set<ServiceDefinition> defSet,
+			ServiceDefinition def) {
+		ServiceDefinition templateDef = new ServiceDefinition(def.getName()
+				+ "Scanner", def.getName(), def.getProperties(), this);
+		defSet.add(templateDef);
 	}
 
 }

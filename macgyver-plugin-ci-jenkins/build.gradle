@@ -21,6 +21,7 @@ dependencies {
     testCompile project(':macgyver-test')
 	 compile project(':macgyver-core')
 	 compile project(':macgyver-plugin-ci')
+     compile "org.lendingclub.projector:projector-jenkins:${PROJECTOR_VERSION}"
 
 }
 
