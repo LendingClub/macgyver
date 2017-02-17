@@ -21,7 +21,7 @@ dependencies {
     testCompile project(':macgyver-test')
      compile project(':macgyver-plugin-cloud')
 	 compile 'com.vmware:vijava:5.1'
-	 
+	compile "org.lendingclub.projector:projector-vmware:${PROJECTOR_VERSION}" 
 
 }
 

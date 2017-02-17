@@ -22,6 +22,7 @@ import java.io.InputStream;
 
 import org.kohsuke.github.GHContent;
 
+import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
 
 public class GitHubResourceImpl extends Resource {
@@ -58,7 +59,7 @@ public class GitHubResourceImpl extends Resource {
 
 	public String toString() {
 		try {
-		return Objects.toStringHelper(this).add("name", getPath()).add("sha1", getHash()).toString();
+		return MoreObjects.toStringHelper(this).add("name", getPath()).add("sha1", getHash()).toString();
 		} 
 		catch (IOException e) {
 			return java.util.Objects.toString(this).toString();

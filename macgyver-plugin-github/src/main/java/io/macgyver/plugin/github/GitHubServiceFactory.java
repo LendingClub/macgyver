@@ -14,6 +14,7 @@
 package io.macgyver.plugin.github;
 
 
+import io.macgyver.core.Kernel;
 import io.macgyver.core.service.BasicServiceFactory;
 import io.macgyver.core.service.ServiceDefinition;
 import io.macgyver.core.service.ServiceRegistry;
@@ -28,6 +29,9 @@ import java.util.Set;
 import org.kohsuke.github.GitHub;
 import org.kohsuke.github.GitHubBuilder;
 import org.kohsuke.github.extras.OkHttpConnector;
+import org.lendingclub.projector.core.Projector;
+import org.lendingclub.projector.github.GitHubScanner;
+import org.lendingclub.projector.github.GitHubScannerBuilder;
 
 import com.google.common.base.Strings;
 import com.squareup.okhttp.OkHttpClient;
@@ -120,6 +124,22 @@ public class GitHubServiceFactory extends BasicServiceFactory<GitHub> {
 
 		registry.registerCollaborator(primaryDefinition.getName() + "Api", rest);
 
+		GitHubScannerBuilder scannerBuilder = Kernel.getApplicationContext().getBean(Projector.class).createBuilder(GitHubScannerBuilder.class);
+		if (!Strings.isNullOrEmpty(url)) {
+			scannerBuilder = scannerBuilder.withUrl(url);
+		}
+		if (!Strings.isNullOrEmpty(username)) {
+			scannerBuilder = scannerBuilder.withUsername(username);
+		}
+		if (!Strings.isNullOrEmpty(password)) {
+			scannerBuilder = scannerBuilder.withPassword(password);
+		}
+		if (!Strings.isNullOrEmpty(oauthToken)) {
+			scannerBuilder = scannerBuilder.withToken(oauthToken);
+		}
+		GitHubScanner scanner = scannerBuilder.build();
+		
+		registry.registerCollaborator(primaryDefinition.getName()+"Scanner", scanner);
 	}
 
 	@Override
@@ -129,6 +149,10 @@ public class GitHubServiceFactory extends BasicServiceFactory<GitHub> {
 				+ "Api", def.getName(), def.getProperties(), this);
 		defSet.add(templateDef);
 
+		
+		templateDef = new ServiceDefinition(def.getName()
+				+ "Scanner", def.getName(), def.getProperties(), this);
+		defSet.add(templateDef);
 	}
 
 }

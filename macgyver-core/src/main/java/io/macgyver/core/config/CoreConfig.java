@@ -22,6 +22,8 @@ import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 
+import org.lendingclub.projector.core.BasicProjector;
+import org.lendingclub.projector.core.Projector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -204,7 +206,7 @@ public class CoreConfig implements EnvironmentAware {
 		if (Strings.isNullOrEmpty(url)) {
 			url = "http://localhost:7474";
 		}
-		logger.info("neo4j.uri: {}", url);
+		logger.info("neo4j.url: {}", url);
 
 		boolean validateCerts = false;
 
@@ -213,6 +215,12 @@ public class CoreConfig implements EnvironmentAware {
 
 	}
 
+	@Bean(name = "macProjector")
+	public Projector macProjector() {
+		BasicProjector p = new BasicProjector();
+		
+		return p;
+	}
 	@Bean
 	public ExtensionResourceProvider macExtensionResourceProvider() {
 		ExtensionResourceProvider loader = new ExtensionResourceProvider();

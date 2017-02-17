@@ -78,7 +78,7 @@ dependencies {
     compile 'com.amazonaws:jmespath-java:1.0'
     
 	compile "ch.qos.logback:logback-classic:${LOGBACK_VERSION}"
-
+    compile "org.lendingclub.projector:projector-core:${PROJECTOR_VERSION}"
     compile "org.lendingclub:reflex:${REFLEX_VERSION}"
     compile("org.springframework.boot:spring-boot-starter-web:${SPRING_BOOT_VERSION}")
     compile("org.springframework.boot:spring-boot-starter-remote-shell:${SPRING_BOOT_VERSION}")

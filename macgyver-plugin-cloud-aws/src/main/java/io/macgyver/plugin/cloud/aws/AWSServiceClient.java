@@ -15,6 +15,8 @@ package io.macgyver.plugin.cloud.aws;
 
 import java.util.Optional;
 
+import org.lendingclub.projector.aws.AWSScannerBuilder;
+
 import com.amazonaws.AmazonWebServiceClient;
 import com.amazonaws.auth.AWSCredentialsProvider;
 import com.amazonaws.regions.Region;
@@ -55,7 +57,7 @@ public interface AWSServiceClient {
 	AmazonEC2Client createEC2Client(String name);
 	AmazonEC2Client createEC2Client(Regions region);
 	AmazonEC2Client createEC2Client(Region region);
-	
+	AWSScannerBuilder createScannerBuilder();
 	String getAccountId();
 	
 	

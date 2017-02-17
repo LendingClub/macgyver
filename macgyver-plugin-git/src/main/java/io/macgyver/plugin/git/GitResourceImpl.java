@@ -22,6 +22,7 @@ import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.ObjectLoader;
 
 import com.google.common.base.Charsets;
+import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
 import com.google.common.io.CharStreams;
 
@@ -74,10 +75,10 @@ public class GitResourceImpl extends Resource {
 
 	public String toString() {
 		try {
-			return Objects.toStringHelper(this).add("objectId", id)
+			return MoreObjects.toStringHelper(this).add("objectId", id)
 					.add("name", getPath()).toString();
 		} catch (Exception e) {
-			return Objects.toStringHelper(this).toString();
+			return MoreObjects.toStringHelper(this).toString();
 		}
 	}
 }

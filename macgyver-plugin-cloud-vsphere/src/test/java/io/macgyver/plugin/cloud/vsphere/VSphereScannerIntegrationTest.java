@@ -21,6 +21,7 @@ import java.net.URL;
 import org.junit.Assume;
 import org.junit.Before;
 import org.junit.Test;
+import org.lendingclub.projector.vmware.RefreshingServiceInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.google.common.base.Strings;
@@ -68,17 +69,10 @@ public class VSphereScannerIntegrationTest extends MacGyverIntegrationTest {
 		}
 	}
 	
+	
+	
 	@Test
-	public void testX() throws Exception {
-		
-		
-		VSphereScanner s = new VSphereScanner(serviceInstance,neo4j);
-		
-
-		s.scanAllHosts();
-
-		
-		
+	public void testIt() {
 		
 	}
 	

@@ -13,12 +13,11 @@
  */
 package io.macgyver.plugin.config;
 
-import io.macgyver.plugin.cloud.aws.AWSServiceFactory;
-import io.macgyver.plugin.cloud.aws.event.SNSMacGyverEventWriter;
-import io.macgyver.plugin.cloud.aws.scanner.AWSScannerService;
-
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
+import io.macgyver.plugin.cloud.aws.AWSServiceFactory;
+import io.macgyver.plugin.cloud.aws.event.SNSMacGyverEventWriter;
 
 @Configuration
 public class AWSConfig {
@@ -30,10 +29,7 @@ public class AWSConfig {
 		
 	}
 	
-	@Bean
-	public AWSScannerService macAWSScannerService() {
-		return new AWSScannerService();
-	}
+
 	
 	@Bean
 	public SNSMacGyverEventWriter macSNSEventPublisher() {
