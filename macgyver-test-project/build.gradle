@@ -26,6 +26,7 @@ dependencies {
 	compile project(":macgyver-plugin-github")
 	compile project(":macgyver-plugin-metrics")
     compile project(":macgyver-plugin-newrelic")
+    compile project(":macgyver-plugin-wavefront")
     compile project(":macgyver-plugin-cmdb")
 	compile project(":macgyver-plugin-git")
 	compile project(":macgyver-core")

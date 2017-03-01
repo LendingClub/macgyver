@@ -82,6 +82,9 @@
     "name" : "macgyver-plugin-newrelic",
     "enabled" : false
   }, {
+    "name" : "macgyver-plugin-wavefront",
+    "enabled" : false
+  }, {
     "name" : "macgyver-plugin-pagerduty",
     "enabled" : false
   }, {
