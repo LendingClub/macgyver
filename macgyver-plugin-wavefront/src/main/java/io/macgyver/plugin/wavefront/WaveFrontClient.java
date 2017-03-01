@@ -26,7 +26,7 @@ import okhttp3.RequestBody;
 
 public class WaveFrontClient {
 
-	public static final String DEFAULT_ENDPOINT_URL = "https://lendingclub.wavefront.com/api";
+	public static final String DEFAULT_ENDPOINT_URL = "https://try.wavefront.com/api";
 
 	ObjectMapper mapper = new ObjectMapper();
 

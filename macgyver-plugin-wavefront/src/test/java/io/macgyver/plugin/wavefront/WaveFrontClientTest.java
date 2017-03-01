@@ -50,7 +50,7 @@ public class WaveFrontClientTest  {
 	public void testX() throws IOException, InterruptedException {
 		// For real: curl -X POST --header "X-AUTH-TOKEN: xxxx"
 		// -d "n=test-wavefront-from-macgyver&h=application%3A%20macgyver-plugin&h=revision%3A%20testrev&l=info&t=test"
-		// "https://lendingclub.wavefront.com/api/events"
+		// "https://try.wavefront.com/api/events"
 		String x =	"	{\"name\":\"test-wavefront-from-macgyver\",\n" +
 				"	\"startTime\":1488325620332,\n" +
 				"	\"annotations\":{\"severity\":\"info\",\"type\":\"test\"},\n" +
