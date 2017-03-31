@@ -1,4 +1,4 @@
-package io.macgyver.plugin.newrelic;
+package io.macgyver.plugin.wavefront;
 
 import io.macgyver.core.event.MacGyverMessage;
 

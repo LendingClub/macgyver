@@ -31,8 +31,6 @@ import org.junit.Assert;
 import org.junit.Assume;
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.Ignore;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,7 +47,6 @@ public class WaveFrontClientTest  {
 	public MockWebServer mockServer = new MockWebServer();
 
 	@Test
-	@Ignore
 	public void testX() throws IOException, InterruptedException {
 		// For real: curl -X POST --header "X-AUTH-TOKEN: xxxx"
 		// -d "n=test-wavefront-from-macgyver&h=application%3A%20macgyver-plugin&h=revision%3A%20testrev&l=info&t=test"
@@ -76,11 +73,10 @@ public class WaveFrontClientTest  {
 
 		RecordedRequest rr = mockServer.takeRequest();
 
-		Assertions.assertThat(rr.getRequestLine()).startsWith("GET /v2/applications?a=b");
+		Assertions.assertThat(rr.getRequestLine()).startsWith("GET /v2/name?a=b");
 	}
 
 	@Test
-	@Ignore
 	public void testInvalidKey() {
 
 		try {
@@ -92,7 +88,7 @@ public class WaveFrontClientTest  {
 		} catch (io.macgyver.okrest3.OkRestException e) {
 			Assertions.assertThat(e).isInstanceOf(
 					io.macgyver.okrest3.OkRestException.class);
-			Assertions.assertThat(e.getErrorResponseBody()).contains("The API key provided is invalid");
+			Assertions.assertThat(e.getErrorResponseBody()).contains("resource cannot be found");
 		}
 	}
 
