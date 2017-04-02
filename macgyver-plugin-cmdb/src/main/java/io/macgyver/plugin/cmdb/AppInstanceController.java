@@ -15,6 +15,7 @@ package io.macgyver.plugin.cmdb;
 
 import java.util.List;
 
+import org.lendingclub.neorx.NeoRxClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
@@ -23,8 +24,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
 
 import com.fasterxml.jackson.databind.JsonNode;
-
-import io.macgyver.neorx.rest.NeoRxClient;
 
 @Controller
 @PreAuthorize("hasAnyRole('ROLE_MACGYVER_USER','ROLE_MACGYVER_ADMIN')")

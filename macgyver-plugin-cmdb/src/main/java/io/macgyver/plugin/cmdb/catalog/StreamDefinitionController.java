@@ -19,6 +19,7 @@ import java.util.NoSuchElementException;
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 
+import org.lendingclub.neorx.NeoRxClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
@@ -27,15 +28,12 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-
-import io.macgyver.neorx.rest.NeoRxClient;
 
 @Controller
 @PreAuthorize("hasAnyRole('ROLE_MACGYVER_USER', 'ROLE_MACGYVER_ADMIN')")
@@ -67,7 +65,7 @@ public class StreamDefinitionController {
 		try {
 			return ResponseEntity
 					.ok(neo4j.execCypher("match (a:StreamDefinition {id:{id}}) return a", "id", jobId)
-							.toBlocking().first());
+							.blockingFirst());
 		} catch (NoSuchElementException e) {
 			return ResponseEntity.status(404).body(mapepr.createObjectNode().put("status", 404).put("message", String.format("stream not found: %s",jobId)));
 		}
@@ -78,7 +76,7 @@ public class StreamDefinitionController {
 
 	
 		
-		List<JsonNode> list = neo4j.execCypher("match (j:StreamDefinition) return j").toList().toBlocking().first();
+		List<JsonNode> list = neo4j.execCypher("match (j:StreamDefinition) return j").toList().blockingGet();
 		
 		
 		
@@ -90,7 +88,7 @@ public class StreamDefinitionController {
 
 		logger.info("loading stream def: {}",id);
 		JsonNode service = neo4j.execCypher("match (j:StreamDefinition {id:{id}}) return j", "id", id)
-		.toBlocking().first();
+		.blockingFirst();
 		
 		
 		ModelAndView m = new ModelAndView("/cmdb/stream-definition").addObject("results",service);

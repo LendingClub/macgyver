@@ -18,11 +18,10 @@ import javax.inject.Inject;
 import org.assertj.core.api.Assertions;
 import org.junit.Assume;
 import org.junit.Test;
+import org.lendingclub.neorx.NeoRxClient;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
-import io.macgyver.neorx.rest.NeoRxClient;
-import io.macgyver.plugin.cmdb.catalog.AppDefinitionLoader;
 import io.macgyver.plugin.git.GitResourceProvider;
 import io.macgyver.test.MacGyverIntegrationTest;
 
@@ -48,7 +47,7 @@ public class DatabaseDefinitionLoaderIntegrationTest extends MacGyverIntegration
 
 	
 		
-		JsonNode n = neo4j.execCypher("match (a:DatabaseDefinition) where a.id='junit-test-db' return a").toBlocking().first();
+		JsonNode n = neo4j.execCypher("match (a:DatabaseDefinition) where a.id='junit-test-db' return a").blockingFirst();
 		
 		Assertions.assertThat(n.path("type").asText()).isEqualTo("mysql");
 	}

@@ -22,11 +22,8 @@ import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.core.env.Environment;
-import org.springframework.core.env.StandardEnvironment;
 
 import com.google.common.base.Optional;
-
-import io.macgyver.neorx.rest.NeoRxClient;
 
 public class Kernel implements ApplicationContextAware {
 
@@ -77,9 +74,12 @@ public class Kernel implements ApplicationContextAware {
 		return applicationContext;
 	}
 	
-	public static NeoRxClient getNeoRxClient() {
-		return Kernel.getApplicationContext().getBean(NeoRxClient.class);
+	public static org.lendingclub.neorx.NeoRxClient getNeoRxClient() {
+		return Kernel.getApplicationContext().getBean(org.lendingclub.neorx.NeoRxClient.class);
 	}
+	/*public static NeoRxClient getNeoRxClient() {
+		return Kernel.getApplicationContext().getBean(NeoRxClient.class);
+	}*/
 	public static ApplicationContext getApplicationContext() {
 		return Kernel.getInstance().applicationContext();
 	}

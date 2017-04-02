@@ -13,9 +13,6 @@
  */
 package io.macgyver.core.cluster;
 
-import io.macgyver.core.scheduler.LocalScheduler;
-import io.macgyver.neorx.rest.NeoRxClient;
-
 import java.net.InetAddress;
 import java.util.Collections;
 import java.util.Comparator;
@@ -27,23 +24,17 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.stream.Collectors;
 
-import javax.annotation.PostConstruct;
-
-import org.bouncycastle.asn1.isismtt.ISISMTTObjectIdentifiers;
+import org.lendingclub.neorx.NeoRxClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.ApplicationListener;
 
-
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.google.common.base.MoreObjects;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;

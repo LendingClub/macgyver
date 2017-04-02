@@ -13,16 +13,15 @@
  */
 package io.macgyver.core.auth;
 
-import io.macgyver.neorx.rest.NeoRxClient;
-import io.macgyver.neorx.rest.NeoRxFunctions;
-
 import java.util.Collection;
 
+import org.lendingclub.neorx.NeoRxClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+
 
 /**
  * This class will map granted authorities from an upstream source (probably
@@ -59,7 +58,7 @@ public class InternalGroupRoleTranslator extends GrantedAuthoritiesTranslator {
 	
 		neo4j.execCypher(
 				"match (g:Group{name:{name}})-[:HAS_ROLE]-(r:Role) return distinct r.name as role_name",
-				"name", sourceName).flatMap(NeoRxFunctions.jsonNodeToString())
+				"name", sourceName).flatMap(UserManager.jsonNodeToString())
 				.forEach(roleName -> {
 					
 					log.info("found role_name: {}",roleName);

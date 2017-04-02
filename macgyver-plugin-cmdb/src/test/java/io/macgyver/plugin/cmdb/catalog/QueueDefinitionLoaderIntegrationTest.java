@@ -18,11 +18,10 @@ import javax.inject.Inject;
 import org.assertj.core.api.Assertions;
 import org.junit.Assume;
 import org.junit.Test;
+import org.lendingclub.neorx.NeoRxClient;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
-import io.macgyver.neorx.rest.NeoRxClient;
-import io.macgyver.plugin.cmdb.catalog.AppDefinitionLoader;
 import io.macgyver.plugin.git.GitResourceProvider;
 import io.macgyver.test.MacGyverIntegrationTest;
 
@@ -47,12 +46,12 @@ public class QueueDefinitionLoaderIntegrationTest extends MacGyverIntegrationTes
 		l.importAll();
 
 	
-		JsonNode n = neo4j.execCypher("match (a:QueueDefinition) where a.id='junit-test-queue-1' return a").toBlocking().first();
+		JsonNode n = neo4j.execCypher("match (a:QueueDefinition) where a.id='junit-test-queue-1' return a").blockingFirst();
 		
 		Assertions.assertThat(n.path("foo").asText()).isEqualTo("bar");
 		
 		
-		Assertions.assertThat(neo4j.execCypher("match (a:QueueDefinition) where a.id='junit-test-parse-error' return a").toBlocking().first().path("error").asText()).contains("ParseException");
+		Assertions.assertThat(neo4j.execCypher("match (a:QueueDefinition) where a.id='junit-test-parse-error' return a").blockingFirst().path("error").asText()).contains("ParseException");
 	}
 	
 	

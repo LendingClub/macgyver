@@ -13,10 +13,11 @@
  */
 package io.macgyver.core.graph;
 
-import rx.functions.Action1;
-import io.macgyver.neorx.rest.NeoRxClient;
+import org.lendingclub.neorx.NeoRxClient;
 
 import com.fasterxml.jackson.databind.JsonNode;
+
+import rx.functions.Action1;
 
 public class NodeInfo<T extends Object> {
 

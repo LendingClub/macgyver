@@ -13,19 +13,18 @@
  */
 package io.macgyver.core.service;
 
-import io.macgyver.core.graph.NodeInfo;
-import io.macgyver.neorx.rest.NeoRxClient;
-import io.macgyver.test.MacGyverIntegrationTest;
-
 import org.junit.Test;
+import org.lendingclub.neorx.NeoRxClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import rx.functions.Action1;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+
+import io.macgyver.core.graph.NodeInfo;
+import io.macgyver.test.MacGyverIntegrationTest;
+import rx.functions.Action1;
 
 public class ServiceScannerTest extends MacGyverIntegrationTest {
 

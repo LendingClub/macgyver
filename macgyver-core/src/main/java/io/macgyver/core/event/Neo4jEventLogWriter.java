@@ -19,6 +19,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 
+import org.lendingclub.neorx.NeoRxClient;
 import org.lendingclub.reflex.concurrent.ConcurrentSubscribers;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,7 +32,6 @@ import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 
-import io.macgyver.neorx.rest.NeoRxClient;
 import io.reactivex.functions.Consumer;
 
 public class Neo4jEventLogWriter implements InitializingBean {

@@ -13,16 +13,12 @@
  */
 package io.macgyver.core.web.neo4j;
 
-import io.macgyver.neorx.rest.NeoRxClient;
-
 import java.io.IOException;
-import java.lang.reflect.Field;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Set;
 import java.util.regex.Pattern;
 
-import javax.annotation.PostConstruct;
 import javax.servlet.ServletException;
 import javax.servlet.ServletInputStream;
 import javax.servlet.ServletOutputStream;
@@ -30,6 +26,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.lendingclub.neorx.NeoRxClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,9 +38,9 @@ import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.common.io.ByteStreams;
+
 import okhttp3.Headers;
 import okhttp3.MediaType;
-import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
@@ -145,9 +142,11 @@ public class Neo4jProxyServlet extends HttpServlet {
 
 			Request.Builder rb = buildProxyRequest(req);
 
-			Response r = neorx.getOkHttpClient().newCall(rb.build()).execute();
-
-			proxyResponse(r, resp);
+			
+			//Response r = neorx.getOkHttpClient().newCall(rb.build()).execute();
+			//proxyResponse(r, resp);
+		
+		
 		} catch (UnauthorizedException e) {
 			resp.sendError(403, e.getMessage());
 		}

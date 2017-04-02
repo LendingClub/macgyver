@@ -27,7 +27,7 @@ dependencies {
 
     compile "org.codehaus.groovy:groovy-all:${GROOVY_VERSION}"
     compile "org.slf4j:jcl-over-slf4j:${SLF4J_VERSION}"
-    compile "io.macgyver.neorx:neorx:${NEORX_VERSION}"
+//    compile "io.macgyver.neorx:neorx:${NEORX_VERSION}"
     compile "io.macgyver.okrest:okrest:${OKREST1_VERSION}"
 	compile "io.macgyver.okrest3:okrest:${OKREST3_VERSION}"
     compile "com.google.guava:guava:${GUAVA_VERSION}"

@@ -13,8 +13,9 @@
  */
 package io.macgyver.plugin.ci;
 
+import org.lendingclub.neorx.NeoRxClient;
+
 import io.macgyver.core.service.ServiceScanner;
-import io.macgyver.neorx.rest.NeoRxClient;
 
 public abstract class CIScanner<T> extends ServiceScanner<T> {
 

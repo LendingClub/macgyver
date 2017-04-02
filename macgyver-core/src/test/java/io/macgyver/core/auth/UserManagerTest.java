@@ -13,20 +13,19 @@
  */
 package io.macgyver.core.auth;
 
-import io.macgyver.neorx.rest.NeoRxClient;
-import io.macgyver.test.MacGyverIntegrationTest;
-
 import java.util.List;
 import java.util.UUID;
 
 import org.assertj.core.api.Assertions;
 import org.junit.After;
 import org.junit.Assert;
-import org.junit.Assume;
 import org.junit.Test;
+import org.lendingclub.neorx.NeoRxClient;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.google.common.collect.Lists;
+
+import io.macgyver.test.MacGyverIntegrationTest;
 
 public class UserManagerTest extends MacGyverIntegrationTest {
 

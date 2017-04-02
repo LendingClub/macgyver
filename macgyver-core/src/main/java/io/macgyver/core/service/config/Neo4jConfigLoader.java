@@ -13,19 +13,17 @@
  */
 package io.macgyver.core.service.config;
 
-import static com.google.common.base.Strings.isNullOrEmpty;
-
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.Map;
 
+import org.lendingclub.neorx.NeoRxClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.google.common.base.Preconditions;
-
-import io.macgyver.neorx.rest.NeoRxClient;
+import com.google.common.base.Strings;
 
 
 public class Neo4jConfigLoader extends ConfigLoader {
@@ -41,7 +39,7 @@ public class Neo4jConfigLoader extends ConfigLoader {
 		try {
 		neo4j.execCypher("match (c:ServiceConfig) return c").forEach(x->{
 			String serviceName = x.path("serviceName").asText();
-			if (isNullOrEmpty(serviceName)) {
+			if (Strings.isNullOrEmpty(serviceName)) {
 				x.fields().forEachRemaining(entry->{
 					m.put(serviceName+"."+entry.getKey(), entry.getValue().asText());
 				});

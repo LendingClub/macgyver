@@ -13,17 +13,17 @@
  */
 package io.macgyver.core.service;
 
-import io.macgyver.core.graph.NodeInfo;
-import io.macgyver.neorx.rest.NeoRxClient;
-
 import java.util.List;
 
-import rx.Observable;
-import rx.functions.Action1;
+import org.lendingclub.neorx.NeoRxClient;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
+
+import io.macgyver.core.graph.NodeInfo;
+import rx.Observable;
+import rx.functions.Action1;
 
 
 /**

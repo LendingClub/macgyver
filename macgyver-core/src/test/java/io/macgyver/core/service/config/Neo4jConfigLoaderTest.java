@@ -14,9 +14,9 @@
 package io.macgyver.core.service.config;
 
 import org.junit.Test;
+import org.lendingclub.neorx.NeoRxClient;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import io.macgyver.neorx.rest.NeoRxClient;
 import io.macgyver.test.MacGyverIntegrationTest;
 
 public class Neo4jConfigLoaderTest extends MacGyverIntegrationTest {

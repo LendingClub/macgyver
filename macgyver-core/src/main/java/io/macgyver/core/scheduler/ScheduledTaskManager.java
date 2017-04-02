@@ -17,6 +17,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
+import org.lendingclub.neorx.NeoRxClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,12 +30,10 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.base.Strings;
 import com.google.common.collect.Maps;
 
-import io.macgyver.core.Bootstrap;
 import io.macgyver.core.Kernel;
 import io.macgyver.core.resource.Resource;
 import io.macgyver.core.resource.ResourceMatcher;
 import io.macgyver.core.script.ExtensionResourceProvider;
-import io.macgyver.neorx.rest.NeoRxClient;
 
 public class ScheduledTaskManager implements ApplicationListener<ApplicationReadyEvent> {
 
@@ -67,13 +66,13 @@ public class ScheduledTaskManager implements ApplicationListener<ApplicationRead
 		String cypher = "merge (t:ScheduledTask {id:{id}}) set t.scheduledBy='manual', t.cron={cron}, t.inlineScript={script}, t.enabled=true, t.inlineScriptLanguage={language} return t";
 		throwIllegalStateOnEmptyList(id,
 				neo4j.execCypher(cypher, "id", id, "cron", cron, SCHEDULED_BY_SCRIPT, script, "language", language)
-						.toList().toBlocking().first());
+						.toList().blockingGet());
 	}
 
 	public void updateSchedule(String id, String cron) {
 		String cypher = "match (t:ScheduledTask {id:{id}}) set t.cron={cron} return t";
 		throwIllegalStateOnEmptyList(id,
-				neo4j.execCypher(cypher, "id", id, "cron", cron).toList().toBlocking().first());
+				neo4j.execCypher(cypher, "id", id, "cron", cron).toList().blockingGet());
 
 	}
 
@@ -87,20 +86,20 @@ public class ScheduledTaskManager implements ApplicationListener<ApplicationRead
 
 	public void enable(String id, boolean b) {
 		String cypher = "match (t:ScheduledTask {id:{id}}) set t.enabled={enabled} return t";
-		throwIllegalStateOnEmptyList(id, neo4j.execCypher(cypher, "id", id, ENABLED, b).toList().toBlocking().first());
+		throwIllegalStateOnEmptyList(id, neo4j.execCypher(cypher, "id", id, ENABLED, b).toList().blockingGet());
 	}
 
 	public void scheduleManually(String id) {
 		throwIllegalStateOnEmptyList(id,
 				neo4j.execCypher("match (t:ScheduledTask {id:{id}}) set t.scheduledBy='manual' return t", "id", id)
-						.toList().toBlocking().first());
+						.toList().blockingGet());
 	}
 
 	public void scheduleByScript(String id) {
 		throwIllegalStateOnEmptyList(id,
 				neo4j.execCypher(
 						"match (t:ScheduledTask {id:{id}}) where length(t.script)>0 set t.scheduledBy='script' return t",
-						"id", id).toList().toBlocking().first());
+						"id", id).toList().blockingGet());
 	}
 
 	public boolean isEnabled(JsonNode config) {

@@ -13,6 +13,7 @@
  */
 package io.macgyver.core.scheduler;
 
+import org.lendingclub.neorx.NeoRxClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -25,8 +26,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-
-import io.macgyver.neorx.rest.NeoRxClient;
 
 @Controller
 public class TaskController {

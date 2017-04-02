@@ -13,20 +13,16 @@
  */
 package io.macgyver.plugin.cmdb;
 
-import io.macgyver.core.service.ServiceRegistry;
-import io.macgyver.core.util.JsonNodes;
-import io.macgyver.neorx.rest.NeoRxClient;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Function;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.lendingclub.neorx.NeoRxClient;
 import org.ocpsoft.prettytime.PrettyTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,6 +40,9 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.base.Strings;
+
+import io.macgyver.core.service.ServiceRegistry;
+import io.macgyver.core.util.JsonNodes;
 
 @Controller
 @RequestMapping("/api/cmdb")
@@ -105,7 +104,7 @@ public class CmdbApiController {
 	@PreAuthorize("hasAnyRole('ROLE_MACGYVER_USER','ROLE_MACGYVER_API_RO')")
 	public ResponseEntity<List<JsonNode>> allAppInstances() {
 		String cypher = "match (x:AppInstance) return x";
-		List<JsonNode> results = neo4j.execCypher(cypher).toList().toBlocking().first();
+		List<JsonNode> results = neo4j.execCypher(cypher).toList().blockingGet();
 		beautifyTimestamps(results);
 		return new ResponseEntity<List<JsonNode>>(results, HttpStatus.OK);
 	}
@@ -115,7 +114,7 @@ public class CmdbApiController {
 	@PreAuthorize("hasAnyRole('ROLE_MACGYVER_USER','ROLE_MACGYVER_API_RO')")
 	public ResponseEntity<List<JsonNode>> appInstancesByEnv(@PathVariable String env) {
 		String cypher = "match (x:AppInstance {environment:{env}}) return x";
-		List<JsonNode> results = neo4j.execCypher(cypher, "env", env).toList().toBlocking().first();
+		List<JsonNode> results = neo4j.execCypher(cypher, "env", env).toList().blockingGet();
 		beautifyTimestamps(results);
 		return new ResponseEntity<List<JsonNode>>(results, HttpStatus.OK);
 	}
@@ -125,7 +124,7 @@ public class CmdbApiController {
 	@PreAuthorize("hasAnyRole('ROLE_MACGYVER_USER','ROLE_MACGYVER_API_RO')")
 	public ResponseEntity<List<JsonNode>> appInstance(@PathVariable String env, @PathVariable String appId) {
 		String cypher = "match (x:AppInstance {appId:{appIds},environment:{env}}) return x";
-		List<JsonNode> results = neo4j.execCypher(cypher, "appIds", appId, "env", env).toList().toBlocking().first();
+		List<JsonNode> results = neo4j.execCypher(cypher, "appIds", appId, "env", env).toList().blockingGet();
 		beautifyTimestamps(results);
 		return new ResponseEntity<List<JsonNode>>(results, HttpStatus.OK);
 	}

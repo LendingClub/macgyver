@@ -26,7 +26,7 @@ dependencies {
     compile "com.google.guava:guava:${GUAVA_VERSION}"
 	compile 'org.kohsuke:wordnet-random-name:1.2'
 	compile "org.assertj:assertj-core:${ASSERTJ_VERSION}"
-	compile "io.macgyver.neorx:neorx:${NEORX_VERSION}"
+	compile "org.lendingclub.neorx:neorx:${NEORX_VERSION}"
 	compile "org.springframework.boot:spring-boot:${SPRING_BOOT_VERSION}"
 	compile "org.springframework.boot:spring-boot-starter-test:${SPRING_BOOT_VERSION}"
 	compile "org.mockito:mockito-all:${MOCKITO_VERSION}"

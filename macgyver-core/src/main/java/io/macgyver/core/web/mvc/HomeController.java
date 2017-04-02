@@ -13,10 +13,7 @@
  */
 package io.macgyver.core.web.mvc;
 
-import java.util.Map;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-
+import org.lendingclub.neorx.NeoRxClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,17 +24,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
 
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.CacheLoader;
-import com.google.common.cache.LoadingCache;
-import com.google.common.collect.Maps;
-
 import io.macgyver.core.auth.AuthUtil;
 import io.macgyver.core.auth.MacGyverRole;
 import io.macgyver.core.web.UIContext;
 import io.macgyver.core.web.UIContextDecorator;
-import io.macgyver.neorx.rest.NeoRxClient;
 
 @Component("macHomeController")
 @Controller

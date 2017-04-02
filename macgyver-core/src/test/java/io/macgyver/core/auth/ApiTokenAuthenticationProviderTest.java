@@ -15,16 +15,14 @@ package io.macgyver.core.auth;
 
 import java.util.concurrent.TimeUnit;
 
-import org.apache.tomcat.util.net.jsse.openssl.Authentication;
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
+import org.lendingclub.neorx.NeoRxClient;
 import org.rapidoid.u.U;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
-import io.macgyver.core.util.JsonNodes;
-import io.macgyver.neorx.rest.NeoRxClient;
 import io.macgyver.test.MacGyverIntegrationTest;
 
 public class ApiTokenAuthenticationProviderTest extends MacGyverIntegrationTest {
@@ -41,7 +39,7 @@ public class ApiTokenAuthenticationProviderTest extends MacGyverIntegrationTest 
 		provider.deleteExpiredTokens();
 
 		String username = "junit-" + System.currentTimeMillis();
-
+		logger.info("username={}",username);
 		JsonNode n = provider.createToken(username, U.set("role_1", "role_2"), System.currentTimeMillis() + 60000);
 
 		ApiToken token = ApiToken
@@ -52,10 +50,10 @@ public class ApiTokenAuthenticationProviderTest extends MacGyverIntegrationTest 
 		ApiToken newToken = ApiToken.parse(newData.path("token").asText());
 
 		Assertions.assertThat(newToken.getAccessKey()).isNotEqualTo(token.getAccessKey());
-
+		System.out.println("access key: "+newToken.getAccessKey());
 		JsonNode newTokenEntry = neo4j
 				.execCypher("match (a:ApiToken {accessKey:{accessKey}}) return a", "accessKey", newToken.getAccessKey())
-				.toBlocking().first();
+				.blockingFirst();
 
 		Assertions.assertThat(newTokenEntry.path("accessKey").asText()).isEqualTo(newToken.getAccessKey());
 		Assertions.assertThat(newTokenEntry.path("username").asText()).isEqualTo(username);
@@ -65,6 +63,7 @@ public class ApiTokenAuthenticationProviderTest extends MacGyverIntegrationTest 
 		long approximateExpiration = (System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(5)) - 5000;
 		Assertions.assertThat(newTokenEntry.path("expirationTs").asLong(0)).isGreaterThan(approximateExpiration);
 
+		
 		org.springframework.security.core.Authentication auth = provider.validateToken(newToken.getArmoredString())
 				.get();
 
