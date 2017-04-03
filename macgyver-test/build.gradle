@@ -29,7 +29,7 @@ dependencies {
 	compile "org.lendingclub.neorx:neorx:${NEORX_VERSION}"
 	compile "org.springframework.boot:spring-boot:${SPRING_BOOT_VERSION}"
 	compile "org.springframework.boot:spring-boot-starter-test:${SPRING_BOOT_VERSION}"
-	compile "org.mockito:mockito-all:${MOCKITO_VERSION}"
+	compile "org.mockito:mockito-core:${MOCKITO_VERSION}"
 	compile "com.squareup.okhttp:mockwebserver:${OKHTTP2_VERSION}"
 	compile "com.squareup.okhttp3:mockwebserver:${OKHTTP3_VERSION}"
     

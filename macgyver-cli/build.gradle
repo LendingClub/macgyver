@@ -72,7 +72,7 @@ dependencies {
 	compile "io.macgyver.okrest3:okrest:${OKREST3_VERSION}"
     compile "com.squareup.okhttp3:logging-interceptor:${OKHTTP3_VERSION}"
 
-	testCompile "org.mockito:mockito-all:${MOCKITO_VERSION}"
+	testCompile "org.mockito:mockito-core:${MOCKITO_VERSION}"
 	testCompile "com.squareup.okhttp3:mockwebserver:${OKHTTP3_VERSION}"
 	testCompile "junit:junit:${JUNIT_VERSION}"
 	testCompile "org.assertj:assertj-core:${ASSERTJ_VERSION}" 
