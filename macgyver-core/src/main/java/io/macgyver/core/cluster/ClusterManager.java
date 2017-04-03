@@ -286,8 +286,9 @@ public class ClusterManager implements ApplicationListener<ApplicationReadyEvent
 
 	protected void expireNode(JsonNode n) {
 		String cypher = "match (cn:ClusterNode {id:{id}}) delete cn";
+		
 		logger.info("removing cluster nade: {}", n);
-		neo4j.execCypher(cypher, "id", n.get("id"));
+		neo4j.execCypher(cypher, "id", n.get("id").asText());
 	}
 
 	public static Comparator<JsonNode> clusterNodeComparator() {

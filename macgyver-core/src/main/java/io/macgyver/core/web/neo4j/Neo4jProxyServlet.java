@@ -17,6 +17,7 @@ import java.io.IOException;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 
 import javax.servlet.ServletException;
@@ -38,9 +39,11 @@ import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.common.io.ByteStreams;
+import com.google.common.io.Closer;
 
 import okhttp3.Headers;
 import okhttp3.MediaType;
+import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
@@ -48,7 +51,13 @@ import okhttp3.ResponseBody;
 
 public class Neo4jProxyServlet extends HttpServlet {
 
+	private static final long serialVersionUID = 1L;
+
+	public static final String DEFAULT_NEO4J_HTTP_URL = "http://localhost:7474";
+
 	public static class UnauthorizedException extends RuntimeException {
+
+		private static final long serialVersionUID = 1L;
 
 		public UnauthorizedException(String message) {
 			super(message);
@@ -63,8 +72,6 @@ public class Neo4jProxyServlet extends HttpServlet {
 
 	@Autowired
 	NeoRxClient neorx;
-
-	
 
 	Logger logger = LoggerFactory.getLogger(Neo4jProxyServlet.class);
 
@@ -83,6 +90,8 @@ public class Neo4jProxyServlet extends HttpServlet {
 
 	List<Pattern> mutationPatterns = Lists.newCopyOnWriteArrayList();
 
+	OkHttpClient httpClient;
+
 	public Neo4jProxyServlet() {
 		super();
 		addMutationCypherKeyword("create");
@@ -93,8 +102,8 @@ public class Neo4jProxyServlet extends HttpServlet {
 	}
 
 	public void addMutationCypherKeyword(String keyword) {
-		mutationPatterns.add(Pattern.compile(".*(\\W|^)+" + keyword
-				+ "([\\W]+.*|$)", Pattern.CASE_INSENSITIVE | Pattern.DOTALL));
+		mutationPatterns.add(
+				Pattern.compile(".*(\\W|^)+" + keyword + "([\\W]+.*|$)", Pattern.CASE_INSENSITIVE | Pattern.DOTALL));
 	}
 
 	boolean isNeo4jProxyWriteAuthorized(HttpServletRequest request) {
@@ -113,14 +122,23 @@ public class Neo4jProxyServlet extends HttpServlet {
 
 	boolean isNeo4jProxyAuthorized(HttpServletRequest request) {
 
-		return isNeo4jProxyReadAuthorized(request)
-				|| isNeo4jProxyWriteAuthorized(request);
+		return isNeo4jProxyReadAuthorized(request) || isNeo4jProxyWriteAuthorized(request);
 
 	}
 
+	synchronized OkHttpClient getOkHttpClient() {
+		if (httpClient == null) {
+			if (Strings.isNullOrEmpty(neo4jUrl)) {
+				neo4jUrl = DEFAULT_NEO4J_HTTP_URL;
+			}
+			httpClient = new OkHttpClient.Builder().readTimeout(30, TimeUnit.SECONDS).writeTimeout(30, TimeUnit.SECONDS)
+					.connectTimeout(10, TimeUnit.SECONDS).build();
+		}
+		return httpClient;
+	}
+
 	@Override
-	protected void service(HttpServletRequest req, HttpServletResponse resp)
-			throws ServletException, IOException {
+	protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 
 		if (req.getRequestURI().equals("/browser")) {
 			resp.sendRedirect("/browser/");
@@ -142,23 +160,23 @@ public class Neo4jProxyServlet extends HttpServlet {
 
 			Request.Builder rb = buildProxyRequest(req);
 
-			
-			//Response r = neorx.getOkHttpClient().newCall(rb.build()).execute();
-			//proxyResponse(r, resp);
-		
-		
+			Response r = getOkHttpClient().newCall(rb.build()).execute();
+			proxyResponse(r, resp);
+
 		} catch (UnauthorizedException e) {
 			resp.sendError(403, e.getMessage());
 		}
 
 	}
 
-	protected Request.Builder buildProxyRequest(HttpServletRequest req)
-			throws IOException {
+	protected Request.Builder buildProxyRequest(HttpServletRequest req) throws IOException {
 
+		Closer closer = Closer.create();
 		Request.Builder rb = new Request.Builder();
 
-		rb = rb.url(toProxyUrl(req));
+		String proxyUrl = toProxyUrl(req);
+
+		rb = rb.url(proxyUrl);
 
 		Enumeration<String> headers = req.getHeaderNames();
 		while (headers.hasMoreElements()) {
@@ -168,19 +186,23 @@ public class Neo4jProxyServlet extends HttpServlet {
 		}
 
 		if (hasBody(req)) {
-			int contentLength = req.getContentLength();
-			ServletInputStream is = req.getInputStream();
-			byte[] b = ByteStreams.toByteArray(is);
+			try {
+				ServletInputStream is = req.getInputStream();
+				closer.register(is);
+				byte[] b = ByteStreams.toByteArray(is);
 
-			checkNeo4jRequest(req, b);
-			RequestBody body = null;
-			String contentType = req.getHeader("Content-type");
-			if (Strings.isNullOrEmpty(contentType)) {
-				body = RequestBody.create(null, b);
-			} else {
-				body = RequestBody.create(MediaType.parse(contentType), b);
+				checkNeo4jRequest(req, b);
+				RequestBody body = null;
+				String contentType = req.getHeader("Content-type");
+				if (Strings.isNullOrEmpty(contentType)) {
+					body = RequestBody.create(null, b);
+				} else {
+					body = RequestBody.create(MediaType.parse(contentType), b);
+				}
+				rb = rb.method(req.getMethod(), body);
+			} finally {
+				closer.close();
 			}
-			rb = rb.method(req.getMethod(), body);
 		} else {
 			rb.method(req.getMethod(), null);
 		}
@@ -192,26 +214,35 @@ public class Neo4jProxyServlet extends HttpServlet {
 		return methodsWithBody.contains(request.getMethod().toUpperCase());
 	}
 
-	protected void proxyResponse(Response southResponse,
-			HttpServletResponse northResponse) throws IOException {
-		int statusCode = southResponse.code();
-		northResponse.setStatus(statusCode);
+	protected void proxyResponse(Response southResponse, HttpServletResponse northResponse) throws IOException {
+		Closer closer = Closer.create();
+		try {
+			int statusCode = southResponse.code();
+			northResponse.setStatus(statusCode);
 
-		Headers h = southResponse.headers();
-		for (String name : h.names()) {
-			if (name.toLowerCase().equals("content-encoding")) {
-				// do nothing
-			} else if (name.toLowerCase().equals("content-length")) {
-				// do nothing
-			} else {
-				northResponse.addHeader(name, h.get(name));
+			Headers h = southResponse.headers();
+			for (String name : h.names()) {
+				if (name.toLowerCase().equals("content-encoding")) {
+					// do nothing
+				} else if (name.toLowerCase().equals("content-length")) {
+					// do nothing
+				} else {
+					northResponse.addHeader(name, h.get(name));
+				}
 			}
-		}
 
-		ResponseBody body = southResponse.body();
-		ServletOutputStream os = northResponse.getOutputStream();
-		os.write(body.bytes());
-		os.close();
+			ResponseBody body = southResponse.body();
+			closer.register(body);
+			ServletOutputStream servletOutputStream = northResponse.getOutputStream();
+
+			closer.register(servletOutputStream);
+
+			servletOutputStream.write(body.bytes());
+
+		} finally {
+
+			closer.close();
+		}
 
 	}
 
@@ -220,6 +251,7 @@ public class Neo4jProxyServlet extends HttpServlet {
 	}
 
 	protected void checkNeo4jRequest(HttpServletRequest request, byte[] b) {
+
 		if (!request.getRequestURI().startsWith("/db/data")) {
 			return;
 		}
@@ -234,11 +266,9 @@ public class Neo4jProxyServlet extends HttpServlet {
 
 	}
 
-	protected void checkNeo4jRequest(HttpServletRequest servletRequest,
-			JsonNode request) {
+	protected void checkNeo4jRequest(HttpServletRequest servletRequest, JsonNode request) {
 
-		for (JsonNode n : Lists.newArrayList(request.path("statements")
-				.iterator())) {
+		for (JsonNode n : Lists.newArrayList(request.path("statements").iterator())) {
 
 			String cypher = n.path("statement").asText();
 			logger.info("cypher: {}", cypher);
@@ -276,11 +306,9 @@ public class Neo4jProxyServlet extends HttpServlet {
 				return true;
 			} else if (path.startsWith("/db/data/transaction")) {
 				return true;
-			}
-			else if (request.getMethod().toUpperCase().equals("GET")) {
-				if (path.equals("/db/data/labels") ||
-						path.equals("/db/data/relationship/types") ||
-						path.equals("/db/data/propertykeys")) {
+			} else if (request.getMethod().toUpperCase().equals("GET")) {
+				if (path.equals("/db/data/labels") || path.equals("/db/data/relationship/types")
+						|| path.equals("/db/data/propertykeys")) {
 					return true;
 				}
 			}
