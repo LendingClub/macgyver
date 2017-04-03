@@ -18,11 +18,10 @@ import javax.inject.Inject;
 import org.assertj.core.api.Assertions;
 import org.junit.Assume;
 import org.junit.Test;
+import org.lendingclub.neorx.NeoRxClient;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
-import io.macgyver.neorx.rest.NeoRxClient;
-import io.macgyver.plugin.cmdb.catalog.JobDefinitionLoader;
 import io.macgyver.plugin.git.GitResourceProvider;
 import io.macgyver.test.MacGyverIntegrationTest;
 
@@ -44,7 +43,7 @@ public class JobCatalogLoaderIntegrationTest extends MacGyverIntegrationTest {
 
 		l.importAll();
 		
-		JsonNode n = neo4j.execCypher("match (j:JobDefinition) where j.id='junit-test-job-1' return j").first().toBlocking().first();
+		JsonNode n = neo4j.execCypher("match (j:JobDefinition) where j.id='junit-test-job-1' return j").blockingFirst();
 		
 		Assertions.assertThat(n.path("description").asText()).isEqualTo("test job");
 		

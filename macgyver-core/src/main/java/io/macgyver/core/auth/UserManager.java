@@ -13,27 +13,30 @@
  */
 package io.macgyver.core.auth;
 
-import io.macgyver.neorx.rest.NeoRxClient;
-import io.macgyver.neorx.rest.NeoRxFunctions;
-
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 
 import javax.annotation.PostConstruct;
 
+import org.lendingclub.neorx.NeoRxClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.NullNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.base.Optional;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.lambdaworks.crypto.SCryptUtil;
+
+import io.reactivex.Observable;
+import io.reactivex.functions.Function;
+
 
 public class UserManager {
 
@@ -47,7 +50,7 @@ public class UserManager {
 		String q = "match (u:User) where u.username={username} return u.username, 'dummy' as dummy";
 
 		JsonNode n = neo4j.execCypher(q, "username", id.toLowerCase())
-				.toBlocking().firstOrDefault(null);
+				.blockingFirst(null);
 		if (n != null) {
 
 			User u = new User();
@@ -67,7 +70,7 @@ public class UserManager {
 			ObjectNode n = new ObjectMapper().createObjectNode();
 			n.put("username", username);
 			JsonNode userNode = neo4j.execCypher(q, "username", username)
-					.toBlocking().firstOrDefault(null);
+					.blockingFirst(null);
 			if (userNode != null) {
 
 				String hashValue = Strings.emptyToNull(userNode.asText());
@@ -186,21 +189,21 @@ public class UserManager {
 		neo4j.execCypher(
 				"match (u:User{username:{username}})-[:HAS_ROLE]-(r:Role) return distinct r.name as role_name",
 				"username", username)
-				.flatMap(NeoRxFunctions.jsonNodeToString())
+				.flatMap(jsonNodeToString())
 				.forEach(role -> roles.add(role));
 
 		// Now grab roles that are indirectly attached via groups
 		neo4j.execCypher(
 				"match (u:User {username:{username}})-[:HAS_MEMBER]-(g:Group)-[]-(r:Role) return r.name as role_name",
 				"username", username)
-				.flatMap(NeoRxFunctions.jsonNodeToString())
+				.flatMap(jsonNodeToString())
 				.forEach(role -> roles.add(role));
 		
 		// Add the groups themselves as well
 		neo4j.execCypher(
 				"match (u:User {username:{username}})-[:HAS_MEMBER]-(g:Group) return g.name as group_name",
 				"username", username)
-				.flatMap(NeoRxFunctions.jsonNodeToString())
+				.flatMap(jsonNodeToString())
 				.forEach(role -> roles.add(InternalGroupRoleTranslator.normalizeUpperCase("GROUP_"+role)));
 		// Note that this will NOT include roles for externally managed groups
 		return roles;
@@ -213,8 +216,7 @@ public class UserManager {
 				.execCypher(
 						"match (g:Group{name:{name}})-[:HAS_ROLE]-(r:Role) return distinct r.name as role_name",
 						"name", group)
-				.flatMap(NeoRxFunctions.jsonNodeToString()).toList()
-				.toBlocking().first();
+				.flatMap(UserManager.jsonNodeToString()).toList().blockingGet();
 
 	}
 
@@ -244,7 +246,7 @@ public class UserManager {
 	public void migrateRolesForUser(String username) {
 		JsonNode n = neo4j
 				.execCypher("match (u:User {username: {username}}) return u",
-						"username", username).toBlocking().first();
+						"username", username).blockingFirst();
 
 		for (JsonNode s : Lists.newArrayList(n.path("roles").iterator())) {
 			String roleName = s.asText();
@@ -280,5 +282,25 @@ public class UserManager {
 	public void addUserToGroup(String group, String username) {
 		String cypher = "match (g:Group {name:{name}}),(u:User {username:{username}}) MERGE (g)-[x:HAS_MEMBER]-(u) return x";
 		neo4j.execCypher(cypher, "username",username,"name",group);
+	}
+	
+	public static Function<JsonNode, Observable<String>> jsonNodeToString() {
+		return new Function<JsonNode, Observable<String>>() {
+
+			@Override
+			public Observable<String> apply(JsonNode t1) {
+				if (t1==null) {
+					return Observable.just(null);
+				}
+				else if (t1 instanceof NullNode) {
+					return Observable.just(null);
+				}
+				else {
+					return Observable.just(t1.asText());
+				}
+			}
+			
+		};
+		
 	}
 }

@@ -13,21 +13,21 @@
  */
 package io.macgyver.core.scheduler;
 
-import io.macgyver.core.Kernel;
-import io.macgyver.core.cluster.ClusterManager;
-import io.macgyver.neorx.rest.NeoRxClient;
-import it.sauronsoftware.cron4j.SchedulingPattern;
-import it.sauronsoftware.cron4j.TaskCollector;
-import it.sauronsoftware.cron4j.TaskTable;
-
 import java.util.List;
 
+import org.lendingclub.neorx.NeoRxClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.beust.jcommander.internal.Lists;
 import com.fasterxml.jackson.databind.JsonNode;
+
+import io.macgyver.core.Kernel;
+import io.macgyver.core.cluster.ClusterManager;
+import it.sauronsoftware.cron4j.SchedulingPattern;
+import it.sauronsoftware.cron4j.TaskCollector;
+import it.sauronsoftware.cron4j.TaskTable;
 
 public class MacGyverTaskCollector implements TaskCollector {
 

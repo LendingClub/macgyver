@@ -22,6 +22,7 @@ import javax.inject.Inject;
 import org.assertj.core.api.Assertions;
 import org.junit.After;
 import org.junit.Test;
+import org.lendingclub.neorx.NeoRxClient;
 import org.mockito.Mockito;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -32,7 +33,6 @@ import com.google.common.collect.Lists;
 import io.macgyver.core.Kernel;
 import io.macgyver.core.cluster.ClusterManager;
 import io.macgyver.core.scheduler.TaskStateManager.TaskState;
-import io.macgyver.neorx.rest.NeoRxClient;
 import io.macgyver.test.MacGyverIntegrationTest;
 import it.sauronsoftware.cron4j.TaskExecutor;
 
@@ -91,8 +91,7 @@ public class TaskStateManagerIntegrationTest extends MacGyverIntegrationTest {
 		String id = "junit_" + UUID.randomUUID().toString();
 		tsm.recordUserDefinedTaskStart(id);
 
-		List<JsonNode> list = neo4j.execCypher("match (t:TaskState {id:{id}}) return t", "id", id).toList().toBlocking()
-				.first();
+		List<JsonNode> list = neo4j.execCypher("match (t:TaskState {id:{id}}) return t", "id", id).toList().blockingGet();
 
 		Assertions.assertThat(list.size()).isEqualTo(1);
 
@@ -108,7 +107,7 @@ public class TaskStateManagerIntegrationTest extends MacGyverIntegrationTest {
 
 		tsm.recordUserDefinedTaskEnd(id, TaskState.COMPLETED);
 
-		list = neo4j.execCypher("match (t:TaskState {id:{id}}) return t", "id", id).toList().toBlocking().first();
+		list = neo4j.execCypher("match (t:TaskState {id:{id}}) return t", "id", id).toList().blockingGet();
 
 		Assertions.assertThat(list.size()).isEqualTo(1);
 
@@ -135,7 +134,7 @@ public class TaskStateManagerIntegrationTest extends MacGyverIntegrationTest {
 			}
 		});
 
-		list = neo4j.execCypher("match (t:TaskState {id:{id}}) return t", "id", id).toList().toBlocking().first();
+		list = neo4j.execCypher("match (t:TaskState {id:{id}}) return t", "id", id).toList().blockingGet();
 
 		Assertions.assertThat(list.size()).isEqualTo(1);
 
@@ -251,7 +250,8 @@ public class TaskStateManagerIntegrationTest extends MacGyverIntegrationTest {
 
 		tsm.recordTaskStart(te);
 
-		neo4j.execCypher("match (t:TaskState {id:{id}}) return t", "id", teGuid).first().forEach(it -> {
+		neo4j.execCypher("match (t:TaskState {id:{id}}) return t", "id", teGuid).toList().blockingGet().forEach(it -> {
+			
 			Assertions.assertThat(it.path("id").asText()).isEqualTo(teGuid);
 			Assertions.assertThat(it.path("taskId").asText()).isEqualTo(taskId);
 			Assertions.assertThat(it.path("state").asText()).isEqualTo("STARTED");

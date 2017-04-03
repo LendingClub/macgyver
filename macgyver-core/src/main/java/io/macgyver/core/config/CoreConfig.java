@@ -24,6 +24,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.lendingclub.mercator.core.BasicProjector;
 import org.lendingclub.mercator.core.Projector;
+import org.lendingclub.neorx.NeoRxClient.Builder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -77,8 +78,6 @@ import io.macgyver.core.service.config.HJsonConfigLoader;
 import io.macgyver.core.service.config.Neo4jConfigLoader;
 import io.macgyver.core.service.config.ServicesGroovyConfigLoader;
 import io.macgyver.core.service.config.SpringConfigLoader;
-import io.macgyver.neorx.rest.NeoRxClient;
-import io.macgyver.neorx.rest.NeoRxClientBuilder;
 import it.sauronsoftware.cron4j.Scheduler;
 import springfox.documentation.builders.ApiInfoBuilder;
 import springfox.documentation.builders.PathSelectors;
@@ -198,7 +197,7 @@ public class CoreConfig implements EnvironmentAware {
 		return new UserManager();
 	}
 
-	@Bean(name = "macGraphClient")
+	/*@Bean(name = "macGraphClient")
 	public NeoRxClient macGraphClient() throws MalformedURLException {
 		Preconditions.checkNotNull(env);
 		String url = env.getProperty("neo4j.url");
@@ -213,6 +212,25 @@ public class CoreConfig implements EnvironmentAware {
 		return new NeoRxClientBuilder().withCertificateValidation(validateCerts)
 				.withCredentials(env.getProperty("neo4j.username"), env.getProperty("neo4j.password")).build();
 
+	}*/
+
+	@Bean(name = "macGraphClient")
+	public org.lendingclub.neorx.NeoRxClient macGraphClient() {
+		Preconditions.checkNotNull(env);
+		String url = env.getProperty("neo4j.bolt.url");
+
+		if (Strings.isNullOrEmpty(url)) {
+			url = "bolt://localhost:7687";
+		}
+		logger.info("neo4j.bolt.url: {}", url);
+
+		Builder builder = new org.lendingclub.neorx.NeoRxClient.Builder();
+		String username = env.getProperty("neo4j.username");
+		String password = env.getProperty("neo4j.password");
+		if (!(Strings.isNullOrEmpty(username) && Strings.isNullOrEmpty(password))) {
+			builder = builder.withCredentials(username, password);
+		}
+		return builder.build();
 	}
 
 	@Bean(name = "macProjector")
@@ -220,21 +238,19 @@ public class CoreConfig implements EnvironmentAware {
 		BasicProjector p = new BasicProjector(macGraphClient());
 		return p;
 	}
-	
+
 	@Bean
 	public ExtensionResourceProvider macExtensionResourceProvider() {
 		ExtensionResourceProvider loader = new ExtensionResourceProvider();
 
-		FileSystemResourceProvider fsLoader = new FileSystemResourceProvider(
-				Bootstrap.getInstance().getMacGyverHome());
+		FileSystemResourceProvider fsLoader = new FileSystemResourceProvider(Bootstrap.getInstance().getMacGyverHome());
 		loader.addResourceLoader(fsLoader);
 
 		return loader;
 	}
 
 	@Override
-	public void setEnvironment(
-			org.springframework.core.env.Environment environment) {
+	public void setEnvironment(org.springframework.core.env.Environment environment) {
 		this.env = environment;
 
 	}
@@ -273,12 +289,6 @@ public class CoreConfig implements EnvironmentAware {
 		return new TaskController();
 	}
 
-
-
-
-
-	
-
 	@Bean
 	public MacGyverEventPublisher macEventPublisher() {
 		return new MacGyverEventPublisher();
@@ -295,12 +305,9 @@ public class CoreConfig implements EnvironmentAware {
 		MacGyverMetricRegistry registry = new MacGyverMetricRegistry();
 		SharedMetricRegistries.add("macMetricRegistry", registry);
 
-		Slf4jReporter r = Slf4jReporter.forRegistry(registry)
-				.withLoggingLevel(LoggingLevel.DEBUG)
-				.convertDurationsTo(TimeUnit.MILLISECONDS)
-				.convertRatesTo(TimeUnit.SECONDS)
-				.outputTo(LoggerFactory.getLogger("io.macgyver.metrics"))
-				.build();
+		Slf4jReporter r = Slf4jReporter.forRegistry(registry).withLoggingLevel(LoggingLevel.DEBUG)
+				.convertDurationsTo(TimeUnit.MILLISECONDS).convertRatesTo(TimeUnit.SECONDS)
+				.outputTo(LoggerFactory.getLogger("io.macgyver.metrics")).build();
 
 		r.start(60, TimeUnit.SECONDS);
 
@@ -323,9 +330,7 @@ public class CoreConfig implements EnvironmentAware {
 	}
 
 	private SecurityContext securityContext() {
-		return SecurityContext.builder()
-				.securityReferences(defaultAuth())
-				.forPaths(PathSelectors.regex("/api.*"))
+		return SecurityContext.builder().securityReferences(defaultAuth()).forPaths(PathSelectors.regex("/api.*"))
 				.build();
 	}
 
@@ -333,32 +338,24 @@ public class CoreConfig implements EnvironmentAware {
 		AuthorizationScope authorizationScope = new AuthorizationScope("global", "accessEverything");
 		AuthorizationScope[] authorizationScopes = new AuthorizationScope[1];
 		authorizationScopes[0] = authorizationScope;
-		return Lists.newArrayList(
-				new SecurityReference("mykey", authorizationScopes));
+		return Lists.newArrayList(new SecurityReference("mykey", authorizationScopes));
 	}
 
-	 @Bean
-	  SecurityConfiguration security() {
-	    return new SecurityConfiguration(
-	        "test-app-client-id",
-	        "test-app-client-secret",
-	        "test-app-realm",
-	        "test-app",
-	        "apiKey",
-	        ApiKeyVehicle.HEADER, 
-	        ApiTokenAuthenticationProvider.API_KEY_HEADER_NAME, 
-	        "," /*scope separator*/);
-	  }
+	@Bean
+	SecurityConfiguration security() {
+		return new SecurityConfiguration("test-app-client-id", "test-app-client-secret", "test-app-realm", "test-app",
+				"apiKey", ApiKeyVehicle.HEADER, ApiTokenAuthenticationProvider.API_KEY_HEADER_NAME,
+				"," /* scope separator */);
+	}
+
 	@Bean
 	public Docket springfoxDocket() {
-		return new Docket(DocumentationType.SWAGGER_2)
-				.select()
-				.apis(RequestHandlerSelectors.any())
-				.paths(regex("/api/.*"))
-				.build()
-				.pathMapping("/")
-				.securitySchemes(Lists.newArrayList(new ApiKey("apikey", ApiTokenAuthenticationProvider.API_KEY_HEADER_NAME, "header")))
-			//	.securityContexts(Lists.newArrayList(securityContext())) // UNUSED
+		return new Docket(DocumentationType.SWAGGER_2).select().apis(RequestHandlerSelectors.any())
+				.paths(regex("/api/.*")).build().pathMapping("/")
+				.securitySchemes(Lists.newArrayList(
+						new ApiKey("apikey", ApiTokenAuthenticationProvider.API_KEY_HEADER_NAME, "header")))
+				// .securityContexts(Lists.newArrayList(securityContext())) //
+				// UNUSED
 				.apiInfo(metadata());
 	}
 
@@ -368,51 +365,47 @@ public class CoreConfig implements EnvironmentAware {
 	}
 
 	private ApiInfo metadata() {
-		return new ApiInfoBuilder()
-				.title("MacGyver API")
-				.description("API Documentation")
-				.version("1.0")
-				.build();
+		return new ApiInfoBuilder().title("MacGyver API").description("API Documentation").version("1.0").build();
 	}
-	
+
 	@Bean
 	public Neo4jConfigLoader macNeo4jConfigLoader() {
 		return new Neo4jConfigLoader();
 	}
-	
+
 	@Bean
 	public ServicesGroovyConfigLoader macServiceGroovyConfigLoader() {
 		return new ServicesGroovyConfigLoader();
 	}
+
 	@Bean
 	public HJsonConfigLoader macHJsonConfigLoader() {
 		return new HJsonConfigLoader();
 	}
-	
+
 	@Bean
 	public SpringConfigLoader macSpringConfigLoader() {
 		return new SpringConfigLoader();
 	}
-	
+
 	@Bean
 	public CompositeConfigLoader macCompositeConfigLoader() {
-		CompositeConfigLoader cl =  new CompositeConfigLoader();
+		CompositeConfigLoader cl = new CompositeConfigLoader();
 		cl.addLoader(macServiceGroovyConfigLoader());
 		cl.addLoader(macHJsonConfigLoader());
 		cl.addLoader(new SpringConfigLoader());
 		cl.addLoader(macNeo4jConfigLoader());
 		return cl;
 	}
-	
+
 	@Bean
 	public Slf4jEventWriter macSlf4jEventWriter() {
 		return new Slf4jEventWriter();
 	}
-	
 
 	@Bean
 	public EventSystem macEventSystem() {
-		
+
 		return new EventSystem();
 	}
 }

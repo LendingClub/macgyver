@@ -1,5 +1,10 @@
 ## Changes
 
+### 1.7.0 - 2017-04-02
+* switch to use Neo4j BOLT protocol
+* neorx 2.0.1
+* mercator 1.4.1
+
 ### 1.6.9 - 2017-02-21
 * mercator should share neo4j client with macgyver
 

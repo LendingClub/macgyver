@@ -13,14 +13,13 @@
  */
 package io.macgyver.core.web.mvc;
 
-import io.macgyver.neorx.rest.NeoRxClient;
-
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.lendingclub.neorx.NeoRxClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -88,7 +87,7 @@ public class SnapShareController {
 						.execCypher(
 								"match (s:SnapShare {token:{token}}) where timestamp()<s.expirationTs  return s",
 								"token", token)
-						.toBlocking().first();
+						.blockingFirst();
 			
 				String v = decrypt(n.path("value").asText());
 

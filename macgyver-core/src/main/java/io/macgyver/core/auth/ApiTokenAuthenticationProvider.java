@@ -13,8 +13,6 @@
  */
 package io.macgyver.core.auth;
 
-import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
@@ -22,14 +20,13 @@ import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
 import javax.inject.Inject;
-import javax.servlet.http.HttpServletRequest;
 
+import org.lendingclub.neorx.NeoRxClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -48,17 +45,10 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.google.common.base.MoreObjects;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
-import com.google.common.hash.Hashing;
-import com.google.common.io.BaseEncoding;
-
-import com.lambdaworks.crypto.SCrypt;
 import com.lambdaworks.crypto.SCryptUtil;
 
-import io.macgyver.core.util.JsonNodes;
-import io.macgyver.neorx.rest.NeoRxClient;
 import rx.exceptions.OnErrorNotImplementedException;
 
 public class ApiTokenAuthenticationProvider implements AuthenticationProvider {
@@ -95,6 +85,8 @@ public class ApiTokenAuthenticationProvider implements AuthenticationProvider {
 	}
 
 	Optional<Authentication> validateToken(String token) {
+		
+		
 		if (Strings.isNullOrEmpty(token)) {
 			return Optional.empty();
 		}
@@ -105,8 +97,8 @@ public class ApiTokenAuthenticationProvider implements AuthenticationProvider {
 
 			String cypher = "match (a:ApiToken {accessKey:{accessKey}}) return a";
 
-			neo4j.execCypher(cypher, "accessKey", apiToken.getAccessKey()).first().forEach(it -> {
-
+			neo4j.execCypher(cypher, "accessKey", apiToken.getAccessKey()).forEach(it -> {
+			
 				if (it.path("expirationTs").asLong(0) < System.currentTimeMillis()) {
 					logger.info("token has expired");
 					deleteToken(apiToken);
@@ -217,7 +209,7 @@ public class ApiTokenAuthenticationProvider implements AuthenticationProvider {
 		attrs.set("roles", roles);
 		String cypher = "merge (a:ApiToken {accessKey:{accessKey}})  set a.secretKeyHash={secretKeyHash}, a.createTs=timestamp(), a.username={username},a.expirationTs={expiration}, a+={attrs}  return a";
 		JsonNode n = neo4j.execCypher(cypher, "accessKey", apiToken.getAccessKey(), "username", username, "attrs",
-				attrs, "expiration", expirationTime, "secretKeyHash", hashedSecretKey).toBlocking().first();
+				attrs, "expiration", expirationTime, "secretKeyHash", hashedSecretKey).blockingFirst();
 
 		ObjectNode on = (ObjectNode) n;
 
@@ -235,7 +227,7 @@ public class ApiTokenAuthenticationProvider implements AuthenticationProvider {
 
 			String cypher = "match (a:ApiToken {accessKey:{accessKey}}) return a";
 
-			JsonNode n = neo4j.execCypher(cypher, "accessKey", oldToken.getAccessKey()).toBlocking().first();
+			JsonNode n = neo4j.execCypher(cypher, "accessKey", oldToken.getAccessKey()).blockingFirst();
 
 			String username = n.path("username").asText();
 			
@@ -253,8 +245,8 @@ public class ApiTokenAuthenticationProvider implements AuthenticationProvider {
 			ObjectNode createdNode = (ObjectNode) neo4j
 					.execCypher(cypher, "accessKey", newToken.getAccessKey(), "secretKeyHash", hash, "username",
 							n.path("username").asText(), "roles", n.path("roles"), "expirationTs", newExpiration)
-					.toBlocking().first();
-
+					.blockingFirst();
+		
 			createdNode.put("token", newToken.getArmoredString());
 			createdNode.remove("accessKey");
 			createdNode.remove("secretKey");

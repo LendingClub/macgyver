@@ -13,9 +13,6 @@
  */
 package io.macgyver.test;
 
-import io.macgyver.neorx.rest.NeoRxClient;
-import io.macgyver.neorx.rest.NeoRxClientBuilder;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -27,6 +24,7 @@ import org.junit.Assume;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.runner.RunWith;
+import org.lendingclub.neorx.NeoRxClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -57,7 +55,7 @@ public abstract class MacGyverIntegrationTest extends
 		if (neo4jAvailable == null) {
 
 			try {
-				neo4jAvailable = new NeoRxClientBuilder().build().checkConnection(); // TODO configurable endpoint
+				neo4jAvailable = new NeoRxClient.Builder().build().checkConnection(); // TODO configurable endpoint
 
 			} catch (Exception e) {
 				logger.info("problem communicating with neo4j", e);

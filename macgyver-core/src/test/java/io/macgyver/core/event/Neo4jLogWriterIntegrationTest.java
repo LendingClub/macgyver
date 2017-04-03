@@ -24,16 +24,13 @@ import org.assertj.core.api.Assertions;
 import org.assertj.core.data.Offset;
 import org.junit.After;
 import org.junit.Test;
+import org.lendingclub.neorx.NeoRxClient;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
-import io.macgyver.core.event.MacGyverMessage;
-import io.macgyver.core.event.Neo4jEventLogWriter;
-
-import io.macgyver.neorx.rest.NeoRxClient;
 import io.macgyver.test.MacGyverIntegrationTest;
 
 public class Neo4jLogWriterIntegrationTest extends MacGyverIntegrationTest {

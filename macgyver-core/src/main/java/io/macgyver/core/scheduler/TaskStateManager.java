@@ -25,6 +25,7 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import org.lendingclub.neorx.NeoRxClient;
 import org.rapidoid.u.U;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,7 +43,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
 import io.macgyver.core.cluster.ClusterManager;
-import io.macgyver.neorx.rest.NeoRxClient;
+import io.macgyver.core.scheduler.TaskStateManager.TaskState;
 import it.sauronsoftware.cron4j.Task;
 import it.sauronsoftware.cron4j.TaskExecutor;
 
@@ -106,7 +107,7 @@ public class TaskStateManager implements ApplicationListener<ApplicationReadyEve
 				List<JsonNode> runningTaskList = neo4j
 						.execCypher("match (t:TaskState {taskId:{taskId}, state:'STARTED',type:'cron4j'}) where t.id<>{selfId} return t",
 								"taskId", taskId, "selfId",taskExecutor.getGuid())
-						.toList().toBlocking().first();
+						.toList().blockingGet();
 
 				if (!runningTaskList.isEmpty()) {
 					// looks like we have a concurrent task execution;
@@ -211,7 +212,7 @@ public class TaskStateManager implements ApplicationListener<ApplicationReadyEve
 		Preconditions.checkState(state!=TaskState.STARTED,TaskState.STARTED+" is not a valid terminal state");
 		String cypher = "match (t:TaskState {id:{id}, state:'STARTED'}) set t.endTs={ts},t.endDate={date} ,t.state={state} return t";
 
-		int updateCount = neo4j.execCypher(cypher, "id", guid, "ts", now.toEpochMilli(), "date", date, "state", state.toString()).toList().toBlocking().first().size();
+		int updateCount = neo4j.execCypher(cypher, "id", guid, "ts", now.toEpochMilli(), "date", date, "state", state.toString()).toList().blockingGet().size();
 		if (updateCount==0) {
 			throw new IllegalStateException("TaskState id="+guid+" could not be set to "+state);
 		}

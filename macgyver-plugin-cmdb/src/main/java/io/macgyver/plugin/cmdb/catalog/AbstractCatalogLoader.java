@@ -20,6 +20,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.lendingclub.neorx.NeoRxClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,7 +41,6 @@ import io.macgyver.core.resource.ResourceProvider;
 import io.macgyver.core.service.ServiceRegistry;
 import io.macgyver.core.util.HJson;
 import io.macgyver.core.util.Neo4jUtil;
-import io.macgyver.neorx.rest.NeoRxClient;
 import io.macgyver.plugin.git.GitRepository;
 import io.macgyver.plugin.git.GitResourceProvider;
 import rx.Observable;
@@ -243,8 +243,8 @@ public abstract class AbstractCatalogLoader {
 		String resourceName = extractNameFromResource(resource);
 
 		String cypher = "merge (j:" + neo4jLabel + " { id :{id}}) set j.error={error},j.updateTs=timestamp() return j";
-		JsonNode n = neo4j.execCypher(cypher, "id", resourceName, "error", e.toString()).toBlocking()
-				.firstOrDefault(MissingNode.getInstance());
+		JsonNode n = neo4j.execCypher(cypher, "id", resourceName, "error", e.toString()).
+				blockingFirst(MissingNode.getInstance());
 
 		if (this instanceof AppDefinitionLoader) {
 			// things can break if appId is not ALSO set. 
@@ -274,8 +274,8 @@ public abstract class AbstractCatalogLoader {
 					copy.put(alternateKey, id);
 				}
 
-				String oldHashVal = neo4j.execCypher("match (a:" + neo4jLabel + " {id:{id}}) return a", "id", id)
-						.firstOrDefault(MissingNode.getInstance()).toBlocking().first().path("entryHash").asText();
+				String oldHashVal = neo4j.execCypher("match (a:" + neo4jLabel + " {id:{id}}) return a", "id", id).blockingFirst
+						(MissingNode.getInstance()).path("entryHash").asText();
 
 				try {
 					copy.put("entryType", getEntryType());
@@ -296,8 +296,7 @@ public abstract class AbstractCatalogLoader {
 					logger.info("change detected in: entryType={} id={} oldHash={} newHash={}", copy.path("entryType").asText(),
 							copy.path("id").asText(),oldHashVal,newHashVal);
 					String cypher = "match (j:" + neo4jLabel + " {id:{id}})  return j";
-					ObjectNode defData = (ObjectNode) neo4j.execCypher(cypher, "id", n.get("id").asText()).toBlocking()
-							.first();
+					ObjectNode defData = (ObjectNode) neo4j.execCypher(cypher, "id", n.get("id").asText()).blockingFirst();
 
 					ServiceCatalogMessage.UpdateMessage m = (ServiceCatalogMessage.UpdateMessage) new ServiceCatalogMessage.UpdateMessage()
 							.withCatalogEntry(defData).withCatalogEntrySource(n);

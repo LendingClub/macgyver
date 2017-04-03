@@ -13,8 +13,6 @@
  */
 package io.macgyver.core.util;
 
-import io.macgyver.neorx.rest.impl.SslTrust;
-
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.net.URL;
@@ -149,7 +147,7 @@ public class CertChecker {
 		try {
 			OkHttpClient c = new OkHttpClient();
 			Request.Builder b = new Request.Builder().url(url);
-			c.setHostnameVerifier(SslTrust.withoutHostnameVerification());
+			c.setHostnameVerifier(io.macgyver.core.jaxrs.SslTrust.withoutHostnameVerification());
 			Response response = c.newCall(b.build()).execute();
 			response.body().close();
 		} catch (Exception e) {
@@ -333,7 +331,7 @@ public class CertChecker {
 
 		CertExtractor extractor = new CertExtractor();
 		c.setHostnameVerifier(extractor);
-		c.setSslSocketFactory(SslTrust.withoutCertificateValidation()
+		c.setSslSocketFactory(io.macgyver.core.jaxrs.SslTrust.withoutCertificateValidation()
 				.getSocketFactory());
 
 		Request r = new Request.Builder().url(httpUrl).build();

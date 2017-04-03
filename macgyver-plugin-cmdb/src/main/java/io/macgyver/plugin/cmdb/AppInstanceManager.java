@@ -26,10 +26,10 @@ import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
-import java.util.regex.Pattern;
 
 import javax.annotation.PostConstruct;
 
+import org.lendingclub.neorx.NeoRxClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,7 +39,6 @@ import com.codahale.metrics.MetricRegistry;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
@@ -51,10 +50,8 @@ import com.google.common.io.ByteStreams;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 
 import io.macgyver.core.metrics.MetricsUtil;
-
 import io.macgyver.core.util.JsonNodes;
 import io.macgyver.core.util.Neo4jPropertyFlattener;
-import io.macgyver.neorx.rest.NeoRxClient;
 import io.macgyver.plugin.cmdb.AppInstanceMessage.Discovery;
 import io.macgyver.plugin.cmdb.AppInstanceMessage.RevisionChange;
 import io.macgyver.plugin.cmdb.AppInstanceMessage.StartupComplete;
@@ -225,7 +222,7 @@ public class AppInstanceManager {
 
 			String query = "match (x:AppInstance {id:{id}}) return x";
 
-			JsonNode existing = neo4j.execCypher(query, "id", id.get()).toBlocking().firstOrDefault(null);
+			JsonNode existing = neo4j.execCypher(query, "id", id.get()).blockingFirst(null);
 
 			if (existing == null) {
 				// there is no value in neo4j
@@ -254,7 +251,7 @@ public class AppInstanceManager {
 					public void run() {
 						String cypher = "merge (x:AppInstance {id:{id}}) set x={props} return x";
 
-						JsonNode r = neo4j.execCypher(cypher, p).toBlocking().firstOrDefault(null);
+						JsonNode r = neo4j.execCypher(cypher, p).blockingFirst(null);
 				
 						processChanges(existing, r);
 					}

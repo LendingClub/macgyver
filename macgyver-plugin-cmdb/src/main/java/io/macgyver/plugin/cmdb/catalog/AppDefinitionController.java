@@ -19,6 +19,7 @@ import java.util.NoSuchElementException;
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 
+import org.lendingclub.neorx.NeoRxClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
@@ -34,7 +35,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
-import io.macgyver.neorx.rest.NeoRxClient;
+import io.reactivex.internal.observers.BlockingFirstObserver;
 
 @Controller
 @PreAuthorize("hasAnyRole('ROLE_MACGYVER_USER', 'ROLE_MACGYVER_ADMIN')")
@@ -66,7 +67,7 @@ public class AppDefinitionController {
 		try {
 			return ResponseEntity
 					.ok(neo4j.execCypher("match (a:AppDefinition {appId:{appId}}) return a order by a.appId", "appId", id)
-							.toBlocking().first());
+							.blockingFirst());
 		} catch (NoSuchElementException e) {
 			return ResponseEntity.status(404).body(mapepr.createObjectNode().put("status", 404).put("message", String.format("not found: %s",id)));
 		}
@@ -76,7 +77,7 @@ public class AppDefinitionController {
 	public ModelAndView apps(HttpServletRequest request) {
 
 		
-		List<JsonNode> results = neo4j.execCypher("match (a:AppDefinition) return a order by a.appId").toList().toBlocking().first();
+		List<JsonNode> results = neo4j.execCypher("match (a:AppDefinition) return a order by a.appId").toList().blockingGet();
 		
 		
 		ModelAndView m = new ModelAndView("/cmdb/app-definitions").addObject("results",results);
@@ -88,7 +89,7 @@ public class AppDefinitionController {
 
 		logger.info("loading app def: {}",appId);
 		JsonNode service = neo4j.execCypher("match (a:AppDefinition {appId:{appId}}) return a", "appId", appId)
-		.toBlocking().first();
+	.blockingFirst();
 		
 		
 		ModelAndView m = new ModelAndView("/cmdb/app-definition").addObject("app",service);

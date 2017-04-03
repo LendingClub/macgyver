@@ -13,17 +13,8 @@
  */
 package io.macgyver.core.scheduler;
 
-import io.macgyver.core.Bootstrap;
-import io.macgyver.core.Kernel;
-import io.macgyver.core.MacGyverException;
-import io.macgyver.core.script.ScriptExecutor;
-import io.macgyver.neorx.rest.NeoRxClient;
-import it.sauronsoftware.cron4j.Task;
-import it.sauronsoftware.cron4j.TaskExecutionContext;
-
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Path;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.UUID;
@@ -37,6 +28,12 @@ import com.google.common.base.MoreObjects;
 import com.google.common.base.MoreObjects.ToStringHelper;
 import com.google.common.base.Preconditions;
 import com.google.common.io.Files;
+
+import io.macgyver.core.Bootstrap;
+import io.macgyver.core.MacGyverException;
+import io.macgyver.core.script.ScriptExecutor;
+import it.sauronsoftware.cron4j.Task;
+import it.sauronsoftware.cron4j.TaskExecutionContext;
 
 public class MacGyverTask extends Task {
 

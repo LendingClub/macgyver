@@ -21,6 +21,7 @@ import java.util.concurrent.TimeUnit;
 import javax.annotation.PostConstruct;
 
 import org.crsh.console.jline.internal.Preconditions;
+import org.lendingclub.neorx.NeoRxClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,7 +33,6 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.macgyver.core.Kernel;
 import io.macgyver.core.scheduler.TaskStateManager.AgingTaskCleanup;
 import io.macgyver.core.scheduler.TaskStateManager.OrphanedTaskCleanup;
-import io.macgyver.neorx.rest.NeoRxClient;
 import it.sauronsoftware.cron4j.Scheduler;
 
 public class LocalScheduler implements Runnable, DirectScriptExecutor {

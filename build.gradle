@@ -15,8 +15,6 @@ buildscript {
 		classpath 'org.ajoberstar:gradle-git:1.0.0'
 		classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
         classpath('io.spring.gradle:dependency-management-plugin:0.6.1.RELEASE')
-        
-
     }
 }
 
@@ -87,10 +85,12 @@ subprojects {
 	}
 	
     repositories {
-  	   mavenLocal()
+        mavenLocal()
         mavenCentral()
 		jcenter()
-		maven { url "https://clojars.org/repo" }
+		maven { 
+            url "https://clojars.org/repo" 
+        }
 	    maven {
 			name "splunk"
 	        url "http://splunk.artifactoryonline.com/splunk/ext-releases-local/"

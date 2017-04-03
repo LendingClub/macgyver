@@ -13,15 +13,13 @@
  */
 package io.macgyver.plugin.cloud.vsphere;
 
-import io.macgyver.neorx.rest.NeoRxClient;
-import io.macgyver.test.MacGyverIntegrationTest;
-
 import java.net.URL;
 
 import org.junit.Assume;
 import org.junit.Before;
 import org.junit.Test;
 import org.lendingclub.mercator.vmware.RefreshingServiceInstance;
+import org.lendingclub.neorx.NeoRxClient;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.google.common.base.Strings;
@@ -29,6 +27,8 @@ import com.thoughtworks.proxy.factory.CglibProxyFactory;
 import com.thoughtworks.proxy.toys.delegate.DelegationMode;
 import com.thoughtworks.proxy.toys.hotswap.HotSwapping;
 import com.vmware.vim25.mo.ServiceInstance;
+
+import io.macgyver.test.MacGyverIntegrationTest;
 public class VSphereScannerIntegrationTest extends MacGyverIntegrationTest {
 
 	
