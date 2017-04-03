@@ -50,7 +50,7 @@ public class ApiTokenAuthenticationProviderTest extends MacGyverIntegrationTest 
 		ApiToken newToken = ApiToken.parse(newData.path("token").asText());
 
 		Assertions.assertThat(newToken.getAccessKey()).isNotEqualTo(token.getAccessKey());
-		System.out.println("access key: "+newToken.getAccessKey());
+	
 		JsonNode newTokenEntry = neo4j
 				.execCypher("match (a:ApiToken {accessKey:{accessKey}}) return a", "accessKey", newToken.getAccessKey())
 				.blockingFirst();
