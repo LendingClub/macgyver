@@ -15,9 +15,12 @@ package io.macgyver.plugin.hipchat;
 
 
 
-import io.macgyver.okrest.OkRestClient;
-import io.macgyver.okrest.OkRestResponse;
-import io.macgyver.okrest.OkRestTarget;
+import io.macgyver.core.service.ProxyConfig;
+import io.macgyver.core.service.ProxyConfigManager;
+import io.macgyver.okrest3.OkRestResponse;
+import io.macgyver.okrest3.OkRestTarget;
+import okhttp3.Interceptor;
+import okhttp3.Response;
 
 import java.io.IOException;
 import java.util.Map;
@@ -30,8 +33,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
-import com.squareup.okhttp.Interceptor;
-import com.squareup.okhttp.Response;
 
 
 public class HipChatClientImpl implements HipChatClient {
@@ -40,8 +41,8 @@ public class HipChatClientImpl implements HipChatClient {
 
 	Logger logger = LoggerFactory.getLogger(HipChatClientImpl.class);
 	String token;
-	OkRestClient okRestClient;
-	OkRestTarget base;
+	io.macgyver.okrest3.OkRestClient okRestClient;
+	io.macgyver.okrest3.OkRestTarget base;
 	String url;
 	ObjectMapper mapper = new ObjectMapper();
 	String version = "v2";
@@ -69,14 +70,26 @@ public class HipChatClientImpl implements HipChatClient {
 	}
 
 	public HipChatClientImpl(String url, String token) {
+		this(url,token,null);
+	}
+	public HipChatClientImpl(String url, String token, ProxyConfig cfg) {
 		Preconditions.checkNotNull(url);
 		Preconditions.checkNotNull(token);
 		this.url = url;
 		this.token = token;
 		
-		okRestClient = new OkRestClient();
+		io.macgyver.okrest3.OkRestClient.Builder builder = new io.macgyver.okrest3.OkRestClient.Builder();
+		builder = builder.withInterceptor(new BearerTokenInterceptor(token));
 		
-		okRestClient.getOkHttpClient().interceptors().add(new BearerTokenInterceptor(token));
+		if (cfg!=null) {
+			builder.withOkHttpClientConfig(cc->{
+				cfg.getProxyConfigManager().apply(cc, cfg);
+				
+			});
+		}
+		okRestClient = builder.build();
+		
+	
 		base = okRestClient.uri(url);
 	}
 
@@ -99,7 +112,7 @@ public class HipChatClientImpl implements HipChatClient {
 			if (params != null) {
 				for (Map.Entry<String, String> entry : params.entrySet()) {
 					target = target
-							.queryParameter(entry.getKey(), entry.getValue());
+							.queryParam(entry.getKey(), entry.getValue());
 				}
 			}
 			

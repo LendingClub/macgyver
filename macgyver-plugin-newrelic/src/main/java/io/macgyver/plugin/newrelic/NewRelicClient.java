@@ -18,11 +18,10 @@ import java.io.IOException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
+import io.macgyver.core.service.ProxyConfig;
 import io.macgyver.okrest3.OkRestClient;
 import io.macgyver.okrest3.OkRestTarget;
-import okhttp3.FormBody;
 import okhttp3.Interceptor;
-import okhttp3.RequestBody;
 
 public class NewRelicClient {
 
@@ -51,6 +50,7 @@ public class NewRelicClient {
 
 	public static class Builder {
 
+		ProxyConfig proxyConfig;
 		String url = DEFAULT_ENDPOINT_URL;
 
 		String apiKey;
@@ -60,6 +60,10 @@ public class NewRelicClient {
 			return this;
 		}
 
+		public Builder withProxyConfig(ProxyConfig proxyConfig) {
+			this.proxyConfig= proxyConfig;
+			return this;
+		}
 		public Builder url(String url) {
 			this.url = url;
 			return this;
@@ -71,6 +75,12 @@ public class NewRelicClient {
 
 			OkRestClient.Builder b = new OkRestClient.Builder().withInterceptor(client.new ApiKeyInterceptor(apiKey));
 
+			if (proxyConfig!=null) {
+				b.withOkHttpClientConfig(cc->{
+					proxyConfig.getProxyConfigManager().apply(cc,proxyConfig);
+				});
+				
+			}
 			client.restTarget = b.build().uri(url);
 			return client;
 

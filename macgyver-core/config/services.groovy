@@ -21,3 +21,15 @@ unittest.testBeanName.serviceType="testService"
 unittest.testBeanName.foo="bar"
 
 a.b.c.url="http://whatever"
+
+
+proxy.test0.host="foo"
+proxy.test0.port=8000
+proxy.test0.username="scott"
+proxy.test0.password="tiger"
+
+
+proxy.test1.host="foo"
+//proxy.test1.port="a"
+//proxy.test1.username="scott"
+//proxy.test0.password="tiger"

@@ -13,11 +13,15 @@
  */
 package io.macgyver.core.service;
 
+import java.util.Optional;
 import java.util.Properties;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
+import com.google.common.base.Strings;
+
+import io.macgyver.core.Kernel;
 
 public class ServiceDefinition {
 	String name;
@@ -103,5 +107,13 @@ public class ServiceDefinition {
 		ServiceDefinition def = new ServiceDefinition(getName()+suffix, getName(), serviceType, getProperties(), getServiceFactory());
 		def.setLazyInit(isLazyInit());
 		return def;
+	}
+	
+	public Optional<ProxyConfig> getProxyConfig() {
+		String proxyConfigName = getProperty("proxy");
+		if (Strings.isNullOrEmpty(proxyConfigName)) {
+			return Optional.empty();
+		}
+		return Kernel.getApplicationContext().getBean(ProxyConfigManager.class).getProxyConfig(proxyConfigName);
 	}
 }

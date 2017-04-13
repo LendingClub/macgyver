@@ -156,7 +156,7 @@ public class HipChatTest {
 
 			client.get("user", "max-results", "1");
 
-		} catch (OkRestException e) {
+		} catch (io.macgyver.okrest3.OkRestException e) {
 			Assertions.assertThat(e.getStatusCode()).isEqualTo(401);
 		}
 

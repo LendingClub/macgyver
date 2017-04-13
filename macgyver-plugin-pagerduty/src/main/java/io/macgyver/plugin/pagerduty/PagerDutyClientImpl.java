@@ -13,80 +13,72 @@
  */
 package io.macgyver.plugin.pagerduty;
 
-import io.macgyver.core.MacGyverException;
-import io.macgyver.core.jaxrs.SslTrust;
-
-import java.io.IOException;
-import java.util.concurrent.TimeUnit;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
-import com.squareup.okhttp.MediaType;
-import com.squareup.okhttp.OkHttpClient;
-import com.squareup.okhttp.Request;
-import com.squareup.okhttp.RequestBody;
-import com.squareup.okhttp.Response;
+
+import io.macgyver.core.MacGyverException;
+import io.macgyver.core.service.ProxyConfig;
+import io.macgyver.okrest3.OkRestClient;
+import io.macgyver.okrest3.OkRestException;
+import io.macgyver.okrest3.OkRestTarget;
 
 public class PagerDutyClientImpl implements PagerDutyClient {
 
 	public static final String DEFAULT_EVENTS_ENDPOINT_URL = "https://events.pagerduty.com/generic/2010-04-15";
 	protected String eventsEndpointUrl = DEFAULT_EVENTS_ENDPOINT_URL;
 
-	private OkHttpClient client;
+	private OkRestTarget target;
 	private boolean validateCertificates = false;
 
+	private ProxyConfig proxyConfig = null;
 	private String serviceKey;
 	ObjectMapper mapper = new ObjectMapper();
 
-	public synchronized OkHttpClient getEventClient() {
-		if (client == null) {
-			client = newEventClient();
+	public synchronized OkRestTarget getEventTarget() {
+		if (target == null) {
+			target = newEventTarget();
 		}
-		return client;
+		return target;
 	}
 
-	protected OkHttpClient newEventClient() {
-		OkHttpClient client = new OkHttpClient();
-		client.setConnectTimeout(10, TimeUnit.SECONDS);
+	protected OkRestTarget newEventTarget() {
 
-		if (!getCertificateValidationEnabled()) {
-			client = client.setHostnameVerifier(SslTrust
-					.withoutHostnameVerification());
-			client = client.setSslSocketFactory(SslTrust
-					.withoutCertificateValidation().getSocketFactory());
+		OkRestClient.Builder builder = new OkRestClient.Builder();
 
+		if (proxyConfig != null) {
+			builder.withOkHttpClientConfig(cc -> {
+				proxyConfig.getProxyConfigManager().apply(cc, proxyConfig);
+			});
 		}
+		OkRestClient client = builder.build();
 
-		return client;
+		this.target = client.uri(eventsEndpointUrl);
+
+		return target;
 	}
 
 	public ObjectNode postEvent(ObjectNode input) {
 
 		try {
-			Request r = new Request.Builder()
-					.url(eventsEndpointUrl + "/create_event.json")
-					.post(RequestBody.create(
-							MediaType.parse("application/json"),
-							input.toString()))
-					.addHeader(
-							"Accept",
-							org.springframework.http.MediaType.APPLICATION_JSON_VALUE)
-					.build();
 
-			Response response = getEventClient().newCall(r).execute();
+			okhttp3.RequestBody body = okhttp3.RequestBody.create(okhttp3.MediaType.parse("application/json"),
+					input.toString());
 
-			ObjectNode rv = (ObjectNode) mapper.readTree(response.body()
-					.string());
+			ObjectNode rv = (ObjectNode) getEventTarget().uri("create_event.json")
+					.addHeader("Accept", org.springframework.http.MediaType.APPLICATION_JSON_VALUE).post(body).execute()
+					.getBody(JsonNode.class);
 
 			throwExceptionIfNecessary(rv);
 
 			return rv;
-		} catch (IOException e) {
+		} catch (OkRestException e) {
+			throw new PagerDutyInvocationException(e);
+		} catch (MacGyverException e) {
+			throw e;
+		} catch (RuntimeException e) {
 			throw new MacGyverException(e);
 		}
 	}
@@ -111,6 +103,10 @@ public class PagerDutyClientImpl implements PagerDutyClient {
 		return serviceKey;
 	}
 
+	public void setProxyConfig(ProxyConfig proxyConfig) {
+		this.proxyConfig = proxyConfig;
+	}
+
 	public void setServiceKey(String key) {
 		this.serviceKey = key;
 	}
@@ -119,8 +115,8 @@ public class PagerDutyClientImpl implements PagerDutyClient {
 		return createIncident(incidentKey, description, null, null, null);
 	}
 
-	protected ObjectNode formatRequest(String operation, String incidentKey,
-			String description, String client, String clientUrl, ObjectNode n) {
+	protected ObjectNode formatRequest(String operation, String incidentKey, String description, String client,
+			String clientUrl, ObjectNode n) {
 		String serviceKey = getServiceKey();
 		if (Strings.isNullOrEmpty(serviceKey)) {
 			throw new MacGyverException("serviceKey must be set");
@@ -147,22 +143,21 @@ public class PagerDutyClientImpl implements PagerDutyClient {
 	}
 
 	@Override
-	public ObjectNode createIncident(String incidentKey, String description,
-			String client, String clientUrl, ObjectNode n) {
+	public ObjectNode createIncident(String incidentKey, String description, String client, String clientUrl,
+			ObjectNode n) {
 
-		return postEvent(formatRequest("trigger", incidentKey, description,
-				client, clientUrl, n));
+		return postEvent(formatRequest("trigger", incidentKey, description, client, clientUrl, n));
 
 	}
-	
+
 	void throwExceptionIfNecessary(ObjectNode n) {
 		JsonNode errors = n.path("errors");
 		if (errors.isArray()) {
 			ArrayNode an = (ArrayNode) errors;
-			if (an.size()>0) {
+			if (an.size() > 0) {
 				throw new PagerDutyInvocationException(an.get(0).asText());
 			}
 		}
 	}
-	
+
 }
