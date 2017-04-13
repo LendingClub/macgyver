@@ -17,7 +17,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.List;
 
-import org.assertj.core.util.Preconditions;
 import org.slf4j.LoggerFactory;
 
 import com.amazonaws.AmazonWebServiceClient;
@@ -98,7 +97,7 @@ public class AWSServiceFactory extends ServiceFactory<AWSServiceClient> {
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public static <T extends AmazonWebServiceClient> AwsClientBuilder<AwsClientBuilder,T> createBuilderForClient(Class<? extends T> clientClass) {
 	
-		Preconditions.checkNotNull(clientClass);
+		com.google.common.base.Preconditions.checkNotNull(clientClass);
 		try {
 			
 			String clientClassName = clientClass.getName();
