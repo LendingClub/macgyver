@@ -18,7 +18,7 @@ import java.io.IOException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
-import io.macgyver.core.service.ProxyConfig;
+import io.macgyver.core.service.ProxyConfigManager.ProxyConfig;
 import io.macgyver.okrest3.OkRestClient;
 import io.macgyver.okrest3.OkRestTarget;
 import okhttp3.FormBody;
@@ -56,7 +56,7 @@ public class WaveFrontClient {
 
 		String apiKey;
 		ProxyConfig proxyConfig;
-		
+
 		public Builder apiKey(String apiKey) {
 			this.apiKey = apiKey;
 			return this;
@@ -66,6 +66,7 @@ public class WaveFrontClient {
 			this.proxyConfig = pc;
 			return this;
 		}
+
 		public Builder url(String url) {
 			this.url = url;
 			return this;
@@ -77,10 +78,8 @@ public class WaveFrontClient {
 
 			OkRestClient.Builder b = new OkRestClient.Builder().withInterceptor(client.new ApiKeyInterceptor(apiKey));
 
-			if (proxyConfig!=null) {
-				b.withOkHttpClientConfig(cc-> {
-				proxyConfig.getProxyConfigManager().apply(cc, proxyConfig);
-				});
+			if (proxyConfig != null) {
+				proxyConfig.apply(b);
 			}
 			client.restTarget = b.build().uri(url);
 			return client;
@@ -96,7 +95,8 @@ public class WaveFrontClient {
 
 		OkRestTarget localTarget = getRestTarget().path(x);
 
-		localTarget = localTarget.queryParam((Object[]) args).accept(org.springframework.http.MediaType.APPLICATION_JSON_VALUE)
+		localTarget = localTarget.queryParam((Object[]) args)
+				.accept(org.springframework.http.MediaType.APPLICATION_JSON_VALUE)
 				.contentType(org.springframework.http.MediaType.APPLICATION_FORM_URLENCODED_VALUE);
 
 		return localTarget.get().execute(ObjectNode.class);

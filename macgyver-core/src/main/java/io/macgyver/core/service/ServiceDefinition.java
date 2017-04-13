@@ -22,6 +22,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 
 import io.macgyver.core.Kernel;
+import io.macgyver.core.service.ProxyConfigManager.ProxyConfig;
 
 public class ServiceDefinition {
 	String name;

@@ -15,7 +15,7 @@ package io.macgyver.plugin.hipchat;
 
 import java.util.Optional;
 
-import io.macgyver.core.service.ProxyConfig;
+import io.macgyver.core.service.ProxyConfigManager.ProxyConfig;
 import io.macgyver.core.service.ServiceDefinition;
 
 public class HipChatServiceFactory extends

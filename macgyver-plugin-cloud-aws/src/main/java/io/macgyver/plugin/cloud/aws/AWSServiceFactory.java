@@ -26,14 +26,13 @@ import com.amazonaws.auth.AWSStaticCredentialsProvider;
 import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.auth.DefaultAWSCredentialsProviderChain;
 import com.amazonaws.client.builder.AwsClientBuilder;
-import com.amazonaws.regions.Region;
 import com.amazonaws.regions.Regions;
 import com.amazonaws.util.StringUtils;
 import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 
+import io.macgyver.core.MacGyverConfigurationException;
 import io.macgyver.core.service.ServiceDefinition;
 import io.macgyver.core.service.ServiceFactory;
 
@@ -112,7 +111,7 @@ public class AWSServiceFactory extends ServiceFactory<AWSServiceClient> {
 			return (AwsClientBuilder) m.invoke(builderClass);
 		
 		} catch (ClassNotFoundException | NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
-			throw new IllegalArgumentException(e);
+			throw new MacGyverConfigurationException(e);
 		}
 	
 	}

@@ -13,27 +13,62 @@
  */
 package io.macgyver.plugin.newrelic;
 
+import java.util.Set;
+
+import org.lendingclub.mercator.core.Projector;
+import org.lendingclub.mercator.newrelic.NewRelicScanner;
+import org.lendingclub.mercator.newrelic.NewRelicScannerBuilder;
+
+
+import io.macgyver.core.Kernel;
 import io.macgyver.core.service.BasicServiceFactory;
 import io.macgyver.core.service.ServiceDefinition;
+import io.macgyver.core.service.ServiceRegistry;
 
-public class NewRelicServiceFactory extends BasicServiceFactory<NewRelicClient>{
+public class NewRelicServiceFactory extends BasicServiceFactory<NewRelicClient> {
 
 	public NewRelicServiceFactory() {
 		super("NewRelic");
-		
+
 	}
 
 	@Override
 	protected NewRelicClient doCreateInstance(ServiceDefinition def) {
-		
-		
-		
-		
-		NewRelicClient c = new NewRelicClient.Builder().withProxyConfig(def.getProxyConfig().orElse(null)).url(def.getProperties().getProperty("url", NewRelicClient.DEFAULT_ENDPOINT_URL)).apiKey(def.getProperties().getProperty("apiKey")).build();
-		
+
+		NewRelicClient c = new NewRelicClient.Builder().withProxyConfig(def.getProxyConfig().orElse(null))
+				.url(def.getProperties().getProperty("url", NewRelicClient.DEFAULT_ENDPOINT_URL))
+				.apiKey(def.getProperties().getProperty("apiKey")).build();
+
 		return c;
 	}
 
+	@Override
+	protected void doCreateCollaboratorInstances(ServiceRegistry registry, ServiceDefinition primaryDefinition,
+			Object primaryBean) {
 
+		try {
+		NewRelicScanner scanner = Kernel.getApplicationContext()
+				.getBean(Projector.class)
+				.createBuilder(NewRelicScannerBuilder.class)
+				.withAccountId(primaryDefinition.getProperty("accountId"))
+				.withToken(primaryDefinition.getProperty("apiKey")).build();
+
+		registry.registerCollaborator(primaryDefinition.getPrimaryName() + "Scanner", scanner);
+		}
+		catch (RuntimeException e) {
+			logger.warn("problem creating scanner",e);
+		}
+
+	}
+
+	@Override
+	public void doCreateCollaboratorDefinitions(Set<ServiceDefinition> defSet, ServiceDefinition def) {
+
+		super.doCreateCollaboratorDefinitions(defSet, def);
+
+		ServiceDefinition templateDef = new ServiceDefinition(def.getName() + "Scanner", def.getName(),
+				def.getProperties(), this);
+		defSet.add(templateDef);
+	}
 
 }

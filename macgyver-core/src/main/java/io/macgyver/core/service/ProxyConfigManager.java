@@ -29,9 +29,11 @@ import com.google.common.cache.CacheLoader.InvalidCacheLoadException;
 import com.google.common.collect.Maps;
 
 import io.macgyver.core.service.config.CompositeConfigLoader;
+import io.macgyver.okrest3.OkRestClient;
 import okhttp3.Authenticator;
 import okhttp3.Credentials;
 import okhttp3.OkHttpClient;
+import okhttp3.OkHttpClient.Builder;
 import okhttp3.Request;
 import okhttp3.Response;
 import okhttp3.Route;
@@ -41,6 +43,21 @@ public class ProxyConfigManager {
 	public static final int DEFAULT_PROXY_PORT = 8080;
 	static Logger logger = LoggerFactory.getLogger(ProxyConfigManager.class);
 
+	public interface ProxyConfig {
+
+		public ProxyConfigManager getProxyConfigManager();
+		String getProtocol();
+		String getHost();
+		int getPort();
+		
+		Optional<String> getUsername();
+		Optional<String> getPassword();
+		
+		public OkHttpClient.Builder apply(OkHttpClient.Builder builder);
+		public OkRestClient.Builder apply(OkRestClient.Builder builder);
+		public RequestConfig.Builder apply(RequestConfig.Builder builder);
+		
+	}
 	@Autowired
 	CompositeConfigLoader configLoader;
 
@@ -82,9 +99,25 @@ public class ProxyConfigManager {
 			return Optional.ofNullable(password);
 		}
 
+		
 		public String toString() {
 			return MoreObjects.toStringHelper(this).add("protocol", protocol).add("host", host).add("port", port)
 					.add("username", username).add("password", getPassword().isPresent() ? "******" : null).toString();
+		}
+		@Override
+		public OkHttpClient.Builder apply(Builder builder) {
+			return getProxyConfigManager().apply(builder, this);
+			
+		}
+		@Override
+		public io.macgyver.okrest3.OkRestClient.Builder apply(io.macgyver.okrest3.OkRestClient.Builder builder) {
+			return getProxyConfigManager().apply(builder, this);
+			
+		}
+		@Override
+		public org.apache.http.client.config.RequestConfig.Builder apply(org.apache.http.client.config.RequestConfig.Builder builder) {
+			return getProxyConfigManager().apply(builder, this);
+			
 		}
 	}
 
@@ -181,7 +214,20 @@ public class ProxyConfigManager {
 		return request;
 
 	}
+	public OkRestClient.Builder apply(OkRestClient.Builder builder, ProxyConfig proxyConfig) {
+		builder = builder.withOkHttpClientConfig(cc->{
+			proxyConfig.getProxyConfigManager().apply(cc, proxyConfig);
+		});
+		return builder;
+	}
+	public OkRestClient.Builder apply(OkRestClient.Builder builder, String proxyConfigName) {
+		Optional<ProxyConfig> cfg = getProxyConfig(proxyConfigName);
+		if (cfg.isPresent()) {
+			return apply(builder, cfg.get());
+		}
 
+		return builder;
+	}
 	public RequestConfig.Builder apply(RequestConfig.Builder builder, String proxyConfigName)  {
 		Optional<ProxyConfig> cfg = getProxyConfig(proxyConfigName);
 		if (cfg.isPresent()) {

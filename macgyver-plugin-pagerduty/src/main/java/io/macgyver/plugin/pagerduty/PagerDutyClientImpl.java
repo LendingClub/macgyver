@@ -20,7 +20,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.base.Strings;
 
 import io.macgyver.core.MacGyverException;
-import io.macgyver.core.service.ProxyConfig;
+import io.macgyver.core.service.ProxyConfigManager.ProxyConfig;
 import io.macgyver.okrest3.OkRestClient;
 import io.macgyver.okrest3.OkRestException;
 import io.macgyver.okrest3.OkRestTarget;
@@ -49,9 +49,7 @@ public class PagerDutyClientImpl implements PagerDutyClient {
 		OkRestClient.Builder builder = new OkRestClient.Builder();
 
 		if (proxyConfig != null) {
-			builder.withOkHttpClientConfig(cc -> {
-				proxyConfig.getProxyConfigManager().apply(cc, proxyConfig);
-			});
+			proxyConfig.apply(builder);
 		}
 		OkRestClient client = builder.build();
 
@@ -76,10 +74,10 @@ public class PagerDutyClientImpl implements PagerDutyClient {
 			return rv;
 		} catch (OkRestException e) {
 			throw new PagerDutyInvocationException(e);
-		} catch (MacGyverException e) {
+		} catch (PagerDutyInvocationException e) {
 			throw e;
 		} catch (RuntimeException e) {
-			throw new MacGyverException(e);
+			throw new PagerDutyInvocationException(e);
 		}
 	}
 

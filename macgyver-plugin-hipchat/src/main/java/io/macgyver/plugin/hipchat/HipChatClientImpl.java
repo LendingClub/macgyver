@@ -15,8 +15,9 @@ package io.macgyver.plugin.hipchat;
 
 
 
-import io.macgyver.core.service.ProxyConfig;
+
 import io.macgyver.core.service.ProxyConfigManager;
+import io.macgyver.core.service.ProxyConfigManager.ProxyConfig;
 import io.macgyver.okrest3.OkRestResponse;
 import io.macgyver.okrest3.OkRestTarget;
 import okhttp3.Interceptor;

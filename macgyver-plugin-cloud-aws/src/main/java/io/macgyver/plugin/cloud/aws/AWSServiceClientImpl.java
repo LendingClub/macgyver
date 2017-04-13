@@ -22,6 +22,7 @@ import org.lendingclub.mercator.core.Projector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+
 import com.amazonaws.AmazonWebServiceClient;
 import com.amazonaws.ClientConfiguration;
 import com.amazonaws.auth.AWSCredentialsProvider;
@@ -37,7 +38,8 @@ import com.google.common.collect.Lists;
 
 import io.macgyver.core.Kernel;
 import io.macgyver.core.MacGyverException;
-import io.macgyver.core.service.ProxyConfig;
+import io.macgyver.core.service.ProxyConfigManager.ProxyConfig;
+
 
 public class AWSServiceClientImpl implements AWSServiceClient {
 

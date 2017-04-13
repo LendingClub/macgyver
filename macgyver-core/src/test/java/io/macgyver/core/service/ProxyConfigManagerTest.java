@@ -4,6 +4,7 @@ import org.assertj.core.api.Assertions;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import io.macgyver.core.service.ProxyConfigManager.ProxyConfig;
 import io.macgyver.test.MacGyverIntegrationTest;
 
 public class ProxyConfigManagerTest extends MacGyverIntegrationTest {
