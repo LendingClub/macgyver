@@ -134,9 +134,8 @@ public class AWSServiceClientImpl implements AWSServiceClient {
 				region = Region.getRegion(Regions.US_EAST_1);
 				logger.warn("region not specified...defaulting to {}",region);
 			}
-			else {
-				builder = builder.withRegion(region.getName());
-			}
+	
+			builder = builder.withRegion(region.getName());
 			
 			return (T) builder.build();
 

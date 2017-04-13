@@ -19,7 +19,6 @@ import org.lendingclub.mercator.core.Projector;
 import org.lendingclub.mercator.newrelic.NewRelicScanner;
 import org.lendingclub.mercator.newrelic.NewRelicScannerBuilder;
 
-
 import io.macgyver.core.Kernel;
 import io.macgyver.core.service.BasicServiceFactory;
 import io.macgyver.core.service.ServiceDefinition;
@@ -47,16 +46,14 @@ public class NewRelicServiceFactory extends BasicServiceFactory<NewRelicClient> 
 			Object primaryBean) {
 
 		try {
-		NewRelicScanner scanner = Kernel.getApplicationContext()
-				.getBean(Projector.class)
-				.createBuilder(NewRelicScannerBuilder.class)
-				.withAccountId(primaryDefinition.getProperty("accountId"))
-				.withToken(primaryDefinition.getProperty("apiKey")).build();
+			NewRelicScanner scanner = Kernel.getApplicationContext().getBean(Projector.class)
+					.createBuilder(NewRelicScannerBuilder.class)
+					.withAccountId(primaryDefinition.getProperty("accountId"))
+					.withToken(primaryDefinition.getProperty("apiKey")).build();
 
-		registry.registerCollaborator(primaryDefinition.getPrimaryName() + "Scanner", scanner);
-		}
-		catch (RuntimeException e) {
-			logger.warn("problem creating scanner",e);
+			registry.registerCollaborator(primaryDefinition.getPrimaryName() + "Scanner", scanner);
+		} catch (RuntimeException e) {
+			logger.warn("problem creating scanner", e);
 		}
 
 	}
