@@ -36,6 +36,8 @@ public class PagerDutyServiceFactory extends BasicServiceFactory<PagerDutyClient
 		
 		PagerDutyClientImpl client = new PagerDutyClientImpl();
 		client.setServiceKey(serviceKey);
+		client.setProxyConfig(def.getProxyConfig().orElse(null));
+		
 		return client;
 	}
 

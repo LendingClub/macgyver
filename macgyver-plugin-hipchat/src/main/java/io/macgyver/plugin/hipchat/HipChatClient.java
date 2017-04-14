@@ -13,11 +13,13 @@
  */
 package io.macgyver.plugin.hipchat;
 
-import io.macgyver.okrest.OkRestTarget;
+
 
 import java.util.Map;
 
 import com.fasterxml.jackson.databind.JsonNode;
+
+import io.macgyver.okrest3.OkRestTarget;
 
 public interface HipChatClient {
 

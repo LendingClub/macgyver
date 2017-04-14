@@ -13,6 +13,9 @@
  */
 package io.macgyver.plugin.hipchat;
 
+import java.util.Optional;
+
+import io.macgyver.core.service.ProxyConfigManager.ProxyConfig;
 import io.macgyver.core.service.ServiceDefinition;
 
 public class HipChatServiceFactory extends
@@ -28,7 +31,13 @@ public class HipChatServiceFactory extends
 		
 		String token = def.getProperties().getProperty("token", "");
 		String url = def.getProperties().getProperty("url","https://api.hipchat.com");
-		HipChatClientImpl c = new HipChatClientImpl(url, token);
+		
+		
+		Optional<ProxyConfig> proxyConfig = def.getProxyConfig();
+		
+		
+		HipChatClientImpl c = new HipChatClientImpl(url, token,proxyConfig.orElse(null));
+		
 		
 		return c;
 	}

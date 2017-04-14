@@ -72,6 +72,7 @@ import io.macgyver.core.scheduler.TaskController;
 import io.macgyver.core.scheduler.TaskStateManager;
 import io.macgyver.core.script.BindingSupplierManager;
 import io.macgyver.core.script.ExtensionResourceProvider;
+import io.macgyver.core.service.ProxyConfigManager;
 import io.macgyver.core.service.ServiceRegistry;
 import io.macgyver.core.service.config.CompositeConfigLoader;
 import io.macgyver.core.service.config.HJsonConfigLoader;
@@ -407,5 +408,10 @@ public class CoreConfig implements EnvironmentAware {
 	public EventSystem macEventSystem() {
 
 		return new EventSystem();
+	}
+	
+	@Bean
+	public ProxyConfigManager macProxyConfigManager() {
+		return new ProxyConfigManager();
 	}
 }

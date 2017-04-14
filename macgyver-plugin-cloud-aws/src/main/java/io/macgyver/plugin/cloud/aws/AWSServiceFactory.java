@@ -13,22 +13,25 @@
  */
 package io.macgyver.plugin.cloud.aws;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.List;
 
 import org.slf4j.LoggerFactory;
 
+import com.amazonaws.AmazonWebServiceClient;
 import com.amazonaws.auth.AWSCredentialsProvider;
 import com.amazonaws.auth.AWSStaticCredentialsProvider;
 import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.auth.DefaultAWSCredentialsProviderChain;
-import com.amazonaws.regions.Region;
+import com.amazonaws.client.builder.AwsClientBuilder;
 import com.amazonaws.regions.Regions;
 import com.amazonaws.util.StringUtils;
 import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 
+import io.macgyver.core.MacGyverConfigurationException;
 import io.macgyver.core.service.ServiceDefinition;
 import io.macgyver.core.service.ServiceFactory;
 
@@ -55,6 +58,7 @@ public class AWSServiceFactory extends ServiceFactory<AWSServiceClient> {
 	protected AWSServiceClient doCreateInstance(ServiceDefinition def) {
 
 		AWSServiceClientImpl ci = new AWSServiceClientImpl();
+		ci.proxyConfig = def.getProxyConfig().orElse(null);
 		ci.setAccountId(def.getProperty("accountId"));
 
 		ci.credentialsProvider = getCredentialsProvider(def);
@@ -88,6 +92,27 @@ public class AWSServiceFactory extends ServiceFactory<AWSServiceClient> {
 		logger.info("using default credentials provider for AWS service " + def.getName());
 		return new DefaultAWSCredentialsProviderChain();
 
+	}
+
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	public static <T extends AmazonWebServiceClient> AwsClientBuilder<AwsClientBuilder,T> createBuilderForClient(Class<? extends T> clientClass) {
+	
+		com.google.common.base.Preconditions.checkNotNull(clientClass);
+		try {
+			
+			String clientClassName = clientClass.getName();
+			String builderClassName = clientClassName + "Builder";
+	
+			Class<? extends AwsClientBuilder> builderClass = (Class<? extends AwsClientBuilder>) Class.forName(builderClassName);
+		
+			Method m = builderClass.getMethod("standard");
+			
+			return (AwsClientBuilder) m.invoke(builderClass);
+		
+		} catch (ClassNotFoundException | NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
+			throw new MacGyverConfigurationException(e);
+		}
+	
 	}
 
 }
