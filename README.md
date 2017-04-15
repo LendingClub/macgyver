@@ -1,7 +1,7 @@
 #MacGyver
 
 
-[![Circle CI](https://circleci.com/gh/LendingClub/macgyver.svg?style=svg)](https://circleci.com/gh/LendingClub/macgyver) [ ![Download](https://api.bintray.com/packages/LendingClub/io-macgyver/io-macgyver/images/download.png) ](https://bintray.com/robschoening/io-macgyver/io-macgyver/_latestVersion)
+[![Circle CI](https://circleci.com/gh/LendingClub/macgyver.svg?style=svg)](https://circleci.com/gh/LendingClub/macgyver) 
 [ ![Download](https://api.bintray.com/packages/lendingclub/OSS/macgyver/images/download.svg) ](https://bintray.com/lendingclub/OSS/macgyer/_latestVersion)
 
 
