@@ -236,8 +236,7 @@ public class CoreConfig implements EnvironmentAware {
 
 	@Bean(name = "macProjector")
 	public Projector macProjector() throws MalformedURLException {
-		BasicProjector p = new BasicProjector(macGraphClient());
-		return p;
+		return new Projector.Builder().withNeoRxClient(macGraphClient()).build();
 	}
 
 	@Bean

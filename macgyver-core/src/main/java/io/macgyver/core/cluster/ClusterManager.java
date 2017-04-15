@@ -25,6 +25,7 @@ import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Supplier;
 
 import org.lendingclub.neorx.NeoRxClient;
 import org.slf4j.Logger;
@@ -101,6 +102,16 @@ public class ClusterManager implements ApplicationListener<ApplicationReadyEvent
 	AtomicReference<Map<String, NodeInfo>> clusterNodeMapRef = new AtomicReference<Map<String, NodeInfo>>(
 			ImmutableMap.of());
 
+	class DefaultEligibility implements Supplier<Boolean> {
+
+		@Override
+		public Boolean get() {
+			return true;
+		}
+		
+	}
+	Supplier<Boolean> primaryEligibilitySupplier = new DefaultEligibility();
+	
 	public List<String> getProcessIdList() {
 		return ImmutableList.copyOf(getClusterNodes().keySet());
 	}
@@ -320,5 +331,14 @@ public class ClusterManager implements ApplicationListener<ApplicationReadyEvent
 		} catch (Exception e) {
 			logger.error("problem creating unique constraint");
 		}
+	}
+	
+	public boolean isEligibleAsPrimary() {
+		return primaryEligibilitySupplier.get();
+	}
+	
+	public void setPrimaryEligibilitySupplier(Supplier<Boolean> supplier) {
+		com.google.common.base.Preconditions.checkNotNull(supplier);
+		this.primaryEligibilitySupplier = supplier;
 	}
 }

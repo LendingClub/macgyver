@@ -3,6 +3,8 @@
 * Integrate mercator-newrelic
 * Add proxy support
 * Shift macgyver-plugin-pagerduty to use OkRest 3.x
+* Mercator 1.5.0
+* Add ability to prevent node from being nominated as leader
 
 ### 1.7.0 - 2017-04-02
 * switch to use Neo4j BOLT protocol

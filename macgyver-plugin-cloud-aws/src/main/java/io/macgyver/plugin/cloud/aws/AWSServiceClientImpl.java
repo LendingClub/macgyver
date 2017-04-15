@@ -14,6 +14,8 @@
 package io.macgyver.plugin.cloud.aws;
 
 import java.lang.reflect.Constructor;
+import java.net.Inet4Address;
+import java.net.InetAddress;
 import java.util.List;
 
 import org.lendingclub.mercator.aws.AWSScannerBuilder;
@@ -128,7 +130,6 @@ public class AWSServiceClientImpl implements AWSServiceClient {
 			}
 			
 			builder.withClientConfiguration(myClientConfiguration);
-			
 			
 			if (region==null) {			
 				region = Region.getRegion(Regions.US_EAST_1);
