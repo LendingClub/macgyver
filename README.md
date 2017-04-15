@@ -1,4 +1,4 @@
-#MacGyver
+# MacGyver
 
 
 [![Circle CI](https://circleci.com/gh/LendingClub/macgyver.svg?style=svg)](https://circleci.com/gh/LendingClub/macgyver) 
