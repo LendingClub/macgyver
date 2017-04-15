@@ -22,7 +22,6 @@ import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 
-import org.lendingclub.mercator.core.BasicProjector;
 import org.lendingclub.mercator.core.Projector;
 import org.lendingclub.neorx.NeoRxClient.Builder;
 import org.slf4j.Logger;

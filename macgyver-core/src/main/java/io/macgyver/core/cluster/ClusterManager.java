@@ -102,16 +102,20 @@ public class ClusterManager implements ApplicationListener<ApplicationReadyEvent
 	AtomicReference<Map<String, NodeInfo>> clusterNodeMapRef = new AtomicReference<Map<String, NodeInfo>>(
 			ImmutableMap.of());
 
+	AtomicReference<Supplier<Boolean>> leaderEligibilitySupplierRef = new AtomicReference<>(new DefaultEligibility());
+
 	class DefaultEligibility implements Supplier<Boolean> {
 
+		private final boolean ALWAYS_ELIGIBLE=true;
+		
 		@Override
 		public Boolean get() {
-			return true;
+			return ALWAYS_ELIGIBLE;
 		}
-		
+
 	}
-	Supplier<Boolean> primaryEligibilitySupplier = new DefaultEligibility();
-	
+
+
 	public List<String> getProcessIdList() {
 		return ImmutableList.copyOf(getClusterNodes().keySet());
 	}
@@ -148,6 +152,10 @@ public class ClusterManager implements ApplicationListener<ApplicationReadyEvent
 		logger.info("...started");
 	}
 
+	public boolean isLeader() {
+		return isPrimary();
+	}
+
 	public boolean isPrimary() {
 		return primaryStatus.get();
 	}
@@ -160,6 +168,7 @@ public class ClusterManager implements ApplicationListener<ApplicationReadyEvent
 		}
 	}
 
+	@SuppressWarnings("unchecked")
 	public void reportStatus() {
 
 		String cypher = "merge (cn:ClusterNode {id:{id}}) ON MATCH set cn.updateTs=timestamp() ON CREATE set cn.host={host}, cn.createTs=timestamp(),cn.updateTs=timestamp(),cn.primary=false ";
@@ -297,7 +306,7 @@ public class ClusterManager implements ApplicationListener<ApplicationReadyEvent
 
 	protected void expireNode(JsonNode n) {
 		String cypher = "match (cn:ClusterNode {id:{id}}) delete cn";
-		
+
 		logger.info("removing cluster nade: {}", n);
 		neo4j.execCypher(cypher, "id", n.get("id").asText());
 	}
@@ -332,13 +341,41 @@ public class ClusterManager implements ApplicationListener<ApplicationReadyEvent
 			logger.error("problem creating unique constraint");
 		}
 	}
-	
-	public boolean isEligibleAsPrimary() {
-		return primaryEligibilitySupplier.get();
+
+	public boolean isEligibleAsLeader() {
+		return leaderEligibilitySupplierRef.get().get();
 	}
-	
-	public void setPrimaryEligibilitySupplier(Supplier<Boolean> supplier) {
+
+	public void setLeaderEligibilitySupplier(Supplier<Boolean> supplier) {
 		com.google.common.base.Preconditions.checkNotNull(supplier);
-		this.primaryEligibilitySupplier = supplier;
+		this.leaderEligibilitySupplierRef.set(supplier);
+	}
+
+	/**
+	 * Convenience for allowing other systems to query leader state.
+	 * @return
+	 */
+	public Supplier<Boolean> getLeaderStateSupplier() {
+		return new Supplier<Boolean>() {
+
+			@Override
+			public Boolean get() {
+				return isLeader();
+			}
+		};
+	}
+
+	/**
+	 * Convenience for allowing other subsystems to query leader state.
+	 * @return
+	 */
+	public com.google.common.base.Supplier<Boolean> getLeaderStateGuavaSupplier() {
+		return new com.google.common.base.Supplier<Boolean>() {
+
+			@Override
+			public Boolean get() {
+				return isLeader();
+			}
+		};
 	}
 }
