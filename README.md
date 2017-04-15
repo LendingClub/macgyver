@@ -1,12 +1,8 @@
 #MacGyver
 
 
-[![Circle CI](https://circleci.com/gh/LendingClub/macgyver.svg?style=svg)](https://circleci.com/gh/LendingClub/macgyver) [ ![Download](https://api.bintray.com/packages/robschoening/io-macgyver/io-macgyver/images/download.png) ](https://bintray.com/robschoening/io-macgyver/io-macgyver/_latestVersion)
-
-##  Quick Start
-
-If you want to start using MacGyver without building it from source, 
-your best option is to clone the [macgyver-quickstart](https://github.com/if6was9/macgyver-quickstart/blob/master/README.md) repository and follow the instructions there.
+[![Circle CI](https://circleci.com/gh/LendingClub/macgyver.svg?style=svg)](https://circleci.com/gh/LendingClub/macgyver) [ ![Download](https://api.bintray.com/packages/LendingClub/io-macgyver/io-macgyver/images/download.png) ](https://bintray.com/robschoening/io-macgyver/io-macgyver/_latestVersion)
+[ ![Download](https://api.bintray.com/packages/lendingclub/OSS/macgyver/images/download.svg) ](https://bintray.com/lendingclub/OSS/macgyer/_latestVersion)
 
 
 ## Building From Source
