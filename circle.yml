@@ -1,8 +1,6 @@
 machine:
     pre:
-        - sudo ./macgyver/tools/circle_setup.sh
-    services:
-        - neo4j
+        - sudo ./macgyver/.ci/circle_setup.sh
     java:
         version: oraclejdk8
     environment:
@@ -19,7 +17,7 @@ dependencies:
 
 test:
     override:
-        - ./.circleci/build.sh
+        - ./.ci/build.sh
     post:
         - mkdir -p $CIRCLE_TEST_REPORTS/junit/
         - find . -type f -regex ".*/build/test-results/.*.xml" -exec cp {} $CIRCLE_TEST_REPORTS/junit/ \;
