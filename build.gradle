@@ -19,11 +19,11 @@ buildscript {
 }
 
 plugins {
-    id "com.github.hierynomus.license" version "0.11.0"
+    id "com.github.hierynomus.license" version "0.13.1"
 }
 
 task wrapper(type: Wrapper) {
-    gradleVersion = '3.3'
+    gradleVersion = '3.5'
 }
 
 subprojects {
