@@ -1,6 +1,6 @@
 machine:
     pre:
-        - sudo ./macgyver/.ci/circle_setup.sh
+        - sudo ./macgyver/.ci/circle-setup.sh
     java:
         version: oraclejdk8
     environment:
