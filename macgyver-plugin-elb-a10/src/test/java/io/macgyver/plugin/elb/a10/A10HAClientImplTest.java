@@ -34,9 +34,8 @@ import org.assertj.core.api.Assertions;
 import org.junit.Rule;
 import org.junit.Test;
 
-import com.squareup.okhttp.mockwebserver.MockResponse;
-import com.squareup.okhttp.mockwebserver.MockWebServer;
-import com.squareup.okhttp.mockwebserver.MockWebServer;
+import okhttp3.mockwebserver.MockResponse;
+import okhttp3.mockwebserver.MockWebServer;
 
 public class A10HAClientImplTest {
 
@@ -55,10 +54,10 @@ public class A10HAClientImplTest {
 	
 	@Test
 	public void testHASelection() {
-		A10ClientImpl c1 = new A10ClientImpl(mock1.getUrl("/services/rest/v2/")
+		A10ClientImpl c1 = new A10ClientImpl(mock1.url("/services/rest/v2/")
 				.toString(), "dummyuser", "dummypassword");
 		
-		A10ClientImpl c2 = new A10ClientImpl(mock2.getUrl("/services/rest/v2/")
+		A10ClientImpl c2 = new A10ClientImpl(mock2.url("/services/rest/v2/")
 				.toString(), "dummyuser", "dummypassword");
 		
 		c1.setAuthToken("prevent_auth");

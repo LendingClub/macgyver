@@ -27,7 +27,6 @@ dependencies {
 
     compile "org.codehaus.groovy:groovy-all:${GROOVY_VERSION}"
     compile "org.slf4j:jcl-over-slf4j:${SLF4J_VERSION}"
-    compile "io.macgyver.okrest:okrest:${OKREST1_VERSION}"
     compile "io.macgyver.okrest3:okrest:${OKREST3_VERSION}"
     compile "com.google.guava:guava:${GUAVA_VERSION}"
     compile 'com.google.code.gson:gson:2.3.1'
@@ -65,10 +64,7 @@ dependencies {
     
     compile 'javax.inject:javax.inject:1'
     compile 'com.ning:async-http-client:1.7.23'
-    
-    compile "com.squareup.okhttp:okhttp:${OKHTTP2_VERSION}"
-    compile "com.squareup.okhttp:okhttp-urlconnection:${OKHTTP2_VERSION}"
-    
+        
     compile "com.squareup.okhttp3:logging-interceptor:${OKHTTP3_VERSION}"
     
     compile 'com.squareup.mimecraft:mimecraft:1.1.1'

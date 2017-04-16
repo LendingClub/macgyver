@@ -29,9 +29,6 @@
 package io.macgyver.plugin.chat;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import io.macgyver.okrest.OkRestException;
-import io.macgyver.plugin.hipchat.HipChatClient;
-import io.macgyver.plugin.hipchat.HipChatClientImpl;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -43,9 +40,12 @@ import org.junit.Rule;
 import org.junit.Test;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.squareup.okhttp.mockwebserver.MockResponse;
-import com.squareup.okhttp.mockwebserver.RecordedRequest;
-import com.squareup.okhttp.mockwebserver.MockWebServer;
+
+import io.macgyver.plugin.hipchat.HipChatClient;
+import io.macgyver.plugin.hipchat.HipChatClientImpl;
+import okhttp3.mockwebserver.MockResponse;
+import okhttp3.mockwebserver.MockWebServer;
+import okhttp3.mockwebserver.RecordedRequest;
 
 public class HipChatTest {
 
@@ -56,7 +56,7 @@ public class HipChatTest {
 
 	@Before
 	public void configure() {
-		client = new HipChatClientImpl(mockServer.getUrl("/").toString(),
+		client = new HipChatClientImpl(mockServer.url("/").toString(),
 				"dummy");
 	}
 

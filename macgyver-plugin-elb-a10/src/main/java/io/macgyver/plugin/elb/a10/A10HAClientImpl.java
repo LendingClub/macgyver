@@ -46,10 +46,10 @@ import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.common.collect.Lists;
 import com.google.common.util.concurrent.UncheckedExecutionException;
-import com.squareup.okhttp.Response;
 
 import io.macgyver.core.util.WeakRefScheduler;
 import io.macgyver.plugin.elb.ElbException;
+import okhttp3.Response;
 
 public class A10HAClientImpl implements A10HAClient, Runnable {
 

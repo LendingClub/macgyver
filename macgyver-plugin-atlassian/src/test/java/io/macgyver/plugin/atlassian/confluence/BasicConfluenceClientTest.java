@@ -28,21 +28,14 @@
  */
 package io.macgyver.plugin.atlassian.confluence;
 
-import groovy.text.GStringTemplateEngine;
-import io.macgyver.okrest.OkRestException;
-
-import java.io.IOException;
-
 import org.assertj.core.api.Assertions;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.squareup.okhttp.mockwebserver.MockResponse;
-import com.squareup.okhttp.mockwebserver.MockWebServer;
-import com.squareup.okhttp.mockwebserver.RecordedRequest;
+import okhttp3.mockwebserver.MockResponse;
+import okhttp3.mockwebserver.MockWebServer;
+import okhttp3.mockwebserver.RecordedRequest;
 
 public class BasicConfluenceClientTest {
 

@@ -45,15 +45,16 @@ import org.slf4j.LoggerFactory;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.io.CharStreams;
-import com.squareup.okhttp.Credentials;
-import com.squareup.okhttp.MediaType;
-import com.squareup.okhttp.OkHttpClient;
-import com.squareup.okhttp.Request;
-import com.squareup.okhttp.RequestBody;
-import com.squareup.okhttp.Response;
-import com.squareup.okhttp.mockwebserver.MockResponse;
-import com.squareup.okhttp.mockwebserver.RecordedRequest;
-import com.squareup.okhttp.mockwebserver.MockWebServer;
+
+import okhttp3.Credentials;
+import okhttp3.MediaType;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
+import okhttp3.mockwebserver.MockResponse;
+import okhttp3.mockwebserver.MockWebServer;
+import okhttp3.mockwebserver.RecordedRequest;
 
 /**
  * This class is less of a test than a demonstration of MockWebServer.
@@ -72,7 +73,7 @@ public class MockWebServerTest {
 	public void demonstrateFirst() throws Exception {
 		portList.add(mockServer.getPort());
 		assertThat(mockServer).isNotNull();
-		assertThat(mockServer.getUrl("/test").toString()).isEqualTo(
+		assertThat(mockServer.url("/test").toString()).isEqualTo(
 				"http://localhost:" + mockServer.getPort() + "/test");
 
 		// Confirm behavior of MockServerRule, a new port per test
@@ -86,7 +87,7 @@ public class MockWebServerTest {
 
 		portList.add(mockServer.getPort());
 		assertThat(mockServer).isNotNull();
-		assertThat(mockServer.getUrl("/test").toString()).isEqualTo(
+		assertThat(mockServer.url("/test").toString()).isEqualTo(
 				"http://localhost:" + mockServer.getPort() + "/test");
 
 		// Confirm behavior of MockServerRule, a new port per test
@@ -105,7 +106,7 @@ public class MockWebServerTest {
 		// set up client and request
 		OkHttpClient client = new OkHttpClient();
 		Request request = new Request.Builder()
-				.url(mockServer.getUrl("/test").toString())
+				.url(mockServer.url("/test").toString())
 				.post(RequestBody.create(MediaType.parse("application/json"),
 						"{}"))
 				.header("Authorization", Credentials.basic("scott", "tiger"))
@@ -137,7 +138,7 @@ public class MockWebServerTest {
 		mockServer.enqueue(new MockResponse().setBody("hello"));
 
 		// Now connect to the mock server and get the greeting
-		URL url = mockServer.getUrl("/greet");
+		URL url = mockServer.url("/greet").url();
 
 		HttpURLConnection c = (HttpURLConnection) url.openConnection();
 

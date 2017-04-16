@@ -30,21 +30,19 @@ package io.macgyver.plugin.atlassian.confluence;
 
 import java.util.concurrent.TimeUnit;
 
-import io.macgyver.okrest.BasicAuthInterceptor;
-import io.macgyver.okrest.OkRestClient;
-import io.macgyver.okrest.OkRestTarget;
+import io.macgyver.okrest3.OkRestClient;
+import io.macgyver.okrest3.OkRestTarget;
 
-import com.squareup.okhttp.OkHttpClient;
+
 
 public class BasicConfluenceClient implements ConfluenceClient {
 
-	private OkRestTarget target;
+	private io.macgyver.okrest3.OkRestTarget target;
 	
 	public BasicConfluenceClient(String url, String username, String password) {
-		OkHttpClient c = new OkHttpClient();
-		c.interceptors().add(new BasicAuthInterceptor(username, password));
+
 		
-		OkRestClient client = new OkRestClient(c);
+		OkRestClient client = new OkRestClient.Builder().withBasicAuth(username, password).build();
 		
 		this.target = client.uri(url);
 		

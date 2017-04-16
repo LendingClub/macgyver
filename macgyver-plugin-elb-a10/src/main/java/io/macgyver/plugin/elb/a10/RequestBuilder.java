@@ -38,7 +38,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
-import com.squareup.okhttp.Response;
+
+import okhttp3.Response;
 
 public class RequestBuilder {
 

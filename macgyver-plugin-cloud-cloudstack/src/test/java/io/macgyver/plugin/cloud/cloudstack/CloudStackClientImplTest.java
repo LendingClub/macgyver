@@ -28,31 +28,21 @@
  */
 package io.macgyver.plugin.cloud.cloudstack;
 
-import io.macgyver.core.util.StandaloneServiceBuilder;
-import io.macgyver.okrest.OkRestLoggingInterceptor;
-import io.macgyver.okrest.compat.OkUriBuilder;
-
-import java.lang.reflect.Method;
-import java.net.URI;
-import java.util.Map;
-
-import javax.ws.rs.core.UriBuilder;
-import javax.ws.rs.core.UriBuilderException;
-
 import org.assertj.core.api.Assertions;
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.squareup.okhttp.mockwebserver.MockResponse;
-import com.squareup.okhttp.mockwebserver.RecordedRequest;
-import com.squareup.okhttp.mockwebserver.MockWebServer;
+
+import okhttp3.mockwebserver.MockResponse;
+import okhttp3.mockwebserver.MockWebServer;
+import okhttp3.mockwebserver.RecordedRequest;
 
 public class CloudStackClientImplTest {
 
+	
 	Logger logger = LoggerFactory.getLogger(CloudStackClientImplTest.class);
 	@Rule
 	public MockWebServer mockServer = new MockWebServer();
@@ -75,10 +65,10 @@ public class CloudStackClientImplTest {
 				"}";
 		mockServer.enqueue(new MockResponse().setBody(loginResponse).setHeader("Set-Cookie", "JSESSIONID=ABCDEF;"));
 		mockServer.enqueue(new MockResponse().setBody("{}"));
-		CloudStackClientImpl c = new CloudStackClientImpl(mockServer.getUrl(
-				"/client/api").toExternalForm()).usernamePasswordAuth("scott",
+		CloudStackClientImpl c = new CloudStackClientImpl(mockServer.url(
+				"/client/api").toString()).usernamePasswordAuth("scott",
 				"tiger");
-		c.target.getOkHttpClient().interceptors().add(new OkRestLoggingInterceptor());
+//		c.target.getOkHttpClient().interceptors().add(new okhttp3.logging.HttpLoggingInterceptor());
 		
 		JsonNode n = c.newRequest().command("test").execute();
 		
@@ -122,9 +112,9 @@ public class CloudStackClientImplTest {
 				"}";
 		mockServer.enqueue(new MockResponse().setBody(loginResponse));
 		mockServer.enqueue(new MockResponse().setBody("{}"));
-		CloudStackClientImpl c = new CloudStackClientImpl(mockServer.getUrl(
-				"/client/api").toExternalForm()).apiKeyAuth("myAccessKey", "mySecretKey");
-		c.target.getOkHttpClient().interceptors().add(new OkRestLoggingInterceptor());
+		CloudStackClientImpl c = new CloudStackClientImpl(mockServer.url(
+				"/client/api").toString()).apiKeyAuth("myAccessKey", "mySecretKey");
+	
 		
 		JsonNode n = c.newRequest().command("test").execute();
 		
@@ -145,8 +135,8 @@ public class CloudStackClientImplTest {
 	public void testIt() throws InterruptedException {
 
 		mockServer.enqueue(new MockResponse().setBody("{}"));
-		CloudStackClientImpl c = new CloudStackClientImpl(mockServer.getUrl(
-				"/client/api").toExternalForm()).apiKeyAuth("key", "secret");
+		CloudStackClientImpl c = new CloudStackClientImpl(mockServer.url(
+				"/client/api").toString()).apiKeyAuth("key", "secret");
 
 		RequestBuilder b = c.newRequest();
 

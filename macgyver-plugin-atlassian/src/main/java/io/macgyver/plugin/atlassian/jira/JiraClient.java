@@ -28,13 +28,11 @@
  */
 package io.macgyver.plugin.atlassian.jira;
 
-import io.macgyver.okrest.OkRestTarget;
-
 import java.io.IOException;
 
-
-
 import com.fasterxml.jackson.databind.JsonNode;
+
+import io.macgyver.okrest3.OkRestTarget;
 
 public interface JiraClient {
 

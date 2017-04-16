@@ -28,11 +28,7 @@
  */
 package io.macgyver.plugin.elb.a10;
 
-import io.macgyver.core.okhttp.LoggingInterceptor;
-import io.macgyver.plugin.elb.ElbException;
-
 import java.io.IOException;
-import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.security.GeneralSecurityException;
@@ -49,8 +45,6 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSession;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
 
 import org.apache.tomcat.util.net.URL;
 import org.jdom2.Document;
@@ -61,15 +55,11 @@ import org.jdom2.output.Format;
 import org.jdom2.output.XMLOutputter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-import org.xml.sax.SAXException;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.base.MoreObjects;
-import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.google.common.cache.CacheBuilder;
@@ -78,15 +68,15 @@ import com.google.common.cache.LoadingCache;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.squareup.okhttp.ConnectionSpec;
-import com.squareup.okhttp.ConnectionSpec.Builder;
-import com.squareup.okhttp.FormEncodingBuilder;
-import com.squareup.okhttp.MediaType;
-import com.squareup.okhttp.OkHttpClient;
-import com.squareup.okhttp.Request;
-import com.squareup.okhttp.RequestBody;
-import com.squareup.okhttp.Response;
-import com.squareup.okhttp.TlsVersion;
+
+import io.macgyver.core.jaxrs.SslTrust;
+import io.macgyver.plugin.elb.ElbException;
+import okhttp3.FormBody;
+import okhttp3.MediaType;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
 
 public class A10ClientImpl implements A10Client {
 
@@ -217,13 +207,13 @@ public class A10ClientImpl implements A10Client {
 	public String authenticate() {
 
 		try {
-			FormEncodingBuilder b = new FormEncodingBuilder();
+			FormBody.Builder b = new FormBody.Builder();
 			b = b.add("username", username).add("password", password).add("format", "json").add("method",
 					"authenticate");
 
-			Request r = new Request.Builder().url(getUrl()).addHeader("Accept", "application/json").post(b.build())
-					.build();
-			Response resp = getClient().newCall(r).execute();
+			okhttp3.Request r = new okhttp3.Request.Builder().url(getUrl()).addHeader("Accept", "application/json")
+					.post(b.build()).build();
+			okhttp3.Response resp = getClient().newCall(r).execute();
 
 			ObjectNode obj = parseJsonResponse(resp, "authenticate");
 
@@ -411,18 +401,16 @@ public class A10ClientImpl implements A10Client {
 
 	protected OkHttpClient getClient() {
 
+		
 		// not guaranteed to be singleton, but close enough
 		if (clientReference.get() == null) {
-			OkHttpClient c = new OkHttpClient();
-
-			c.setConnectTimeout(20, TimeUnit.SECONDS);
-			
-			c.setHostnameVerifier(withoutHostnameVerification());
-			c.setSslSocketFactory(withoutCertificateValidation().getSocketFactory());
-
-			c.setConnectionSpecs(getA10CompatibleConnectionSpecs());
-			c.interceptors().add(LoggingInterceptor.create(A10ClientImpl.class));
-			clientReference.set(c);
+			OkHttpClient.Builder cb = new OkHttpClient.Builder()
+					.connectTimeout(20, TimeUnit.SECONDS)
+					.hostnameVerifier(withoutHostnameVerification())
+					.sslSocketFactory(withoutCertificateValidation().getSocketFactory(),new TrustAllManager())
+					.connectionSpecs(getA10CompatibleConnectionSpecs());
+			// c.interceptors().add(LoggingInterceptor.create(A10ClientImpl.class));
+			clientReference.set(cb.build());
 		}
 		return clientReference.get();
 	}
@@ -441,30 +429,31 @@ public class A10ClientImpl implements A10Client {
 
 	static AtomicReference<SSLContext> trustAllContext = new AtomicReference<>();
 
+	 static class TrustAllManager implements X509TrustManager {
+
+			@Override
+			public X509Certificate[] getAcceptedIssuers() {
+
+				return new X509Certificate[0];
+			}
+
+			@Override
+			public void checkServerTrusted(X509Certificate[] arg0, String arg1) throws CertificateException {
+
+			}
+
+			@Override
+			public void checkClientTrusted(X509Certificate[] arg0, String arg1) throws CertificateException {
+
+			}
+		}
 	public static synchronized SSLContext withoutCertificateValidation() {
 		try {
 			SSLContext sslContext = trustAllContext.get();
 			if (sslContext != null) {
 				return sslContext;
 			}
-			TrustManager[] trustAllCerts = new TrustManager[] { new X509TrustManager() {
-
-				@Override
-				public X509Certificate[] getAcceptedIssuers() {
-
-					return null;
-				}
-
-				@Override
-				public void checkServerTrusted(X509Certificate[] arg0, String arg1) throws CertificateException {
-
-				}
-
-				@Override
-				public void checkClientTrusted(X509Certificate[] arg0, String arg1) throws CertificateException {
-
-				}
-			} };
+			TrustManager[] trustAllCerts = new TrustManager[] { new TrustAllManager() };
 
 			// A10 management port seems to implement a fairly broken HTTPS
 			// stack which
@@ -486,14 +475,15 @@ public class A10ClientImpl implements A10Client {
 	 *
 	 * @return
 	 */
-	List<ConnectionSpec> getA10CompatibleConnectionSpecs() {
-		List<ConnectionSpec> list = Lists.newArrayList();
+	List<okhttp3.ConnectionSpec> getA10CompatibleConnectionSpecs() {
+		List<okhttp3.ConnectionSpec> list = Lists.newArrayList();
 
-		list.add(new Builder(ConnectionSpec.MODERN_TLS).tlsVersions(TlsVersion.TLS_1_0).build()); // This
-																									// is
-																									// essential
-		list.add(ConnectionSpec.MODERN_TLS);
-		list.add(ConnectionSpec.CLEARTEXT);
+		list.add(new okhttp3.ConnectionSpec.Builder(okhttp3.ConnectionSpec.MODERN_TLS)
+				.tlsVersions(okhttp3.TlsVersion.TLS_1_0).build()); // This
+		// is
+		// essential
+		list.add(okhttp3.ConnectionSpec.MODERN_TLS);
+		list.add(okhttp3.ConnectionSpec.CLEARTEXT);
 		return ImmutableList.copyOf(list);
 	}
 
@@ -534,7 +524,7 @@ public class A10ClientImpl implements A10Client {
 			for (String key : x.keySet()) {
 				if (!key.equals("format")) {
 					String val = x.get(key);
-					sb.append(String.format("&%s=%s", URLEncoder.encode(key, UTF8),URLEncoder.encode(val,UTF8)));
+					sb.append(String.format("&%s=%s", URLEncoder.encode(key, UTF8), URLEncoder.encode(val, UTF8)));
 
 				}
 			}
@@ -590,19 +580,20 @@ public class A10ClientImpl implements A10Client {
 
 			String url = null;
 
-			Response resp;
+			okhttp3.Response resp;
 			String format = b.getParams().getOrDefault("format", "xml");
 			b = b.param("format", format);
 			if (!b.hasBody()) {
 
 				url = formatUrl(b.getParams(), format);
-				FormEncodingBuilder fb = new FormEncodingBuilder().add("session_id", getAuthToken());
+				FormBody.Builder fb = new FormBody.Builder().add("session_id", getAuthToken());
 				for (Map.Entry<String, String> entry : b.getParams().entrySet()) {
 					if (!entry.getValue().equals("format")) {
 						fb = fb.add(entry.getKey(), entry.getValue());
 					}
 				}
-				resp = getClient().newCall(new Request.Builder().url(getUrl()).post(fb.build()).build()).execute();
+				resp = getClient().newCall(new okhttp3.Request.Builder().url(getUrl()).post(fb.build()).build())
+						.execute();
 			} else if (b.getXmlBody().isPresent()) {
 				b = b.param("format", "xml");
 				url = formatUrl(b.getParams(), "xml");
@@ -619,7 +610,8 @@ public class A10ClientImpl implements A10Client {
 				final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
 				resp = getClient().newCall(new Request.Builder().url(url).post(
 
-				RequestBody.create(JSON, bodyAsString)).header("Content-Type", "application/json").build()).execute();
+						RequestBody.create(JSON, bodyAsString)).header("Content-Type", "application/json").build())
+						.execute();
 			} else {
 				throw new UnsupportedOperationException("body type not supported");
 			}
@@ -636,5 +628,4 @@ public class A10ClientImpl implements A10Client {
 		}
 	}
 
-	
 }

@@ -28,8 +28,7 @@
  */
 package io.macgyver.plugin.atlassian.confluence;
 
-import io.macgyver.okrest.OkRestClient;
-import io.macgyver.okrest.OkRestTarget;
+import io.macgyver.okrest3.OkRestTarget;
 
 public interface ConfluenceClient {
 

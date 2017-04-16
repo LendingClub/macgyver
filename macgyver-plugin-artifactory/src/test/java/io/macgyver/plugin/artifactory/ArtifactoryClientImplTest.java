@@ -28,7 +28,6 @@
  */
 package io.macgyver.plugin.artifactory;
 
-import io.macgyver.okrest.OkRestLoggingInterceptor;
 
 import java.io.IOException;
 
@@ -37,9 +36,10 @@ import org.junit.Rule;
 import org.junit.Test;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.squareup.okhttp.mockwebserver.MockResponse;
-import com.squareup.okhttp.mockwebserver.RecordedRequest;
-import com.squareup.okhttp.mockwebserver.MockWebServer;
+
+import okhttp3.mockwebserver.MockResponse;
+import okhttp3.mockwebserver.MockWebServer;
+import okhttp3.mockwebserver.RecordedRequest;
 
 public class ArtifactoryClientImplTest {
 

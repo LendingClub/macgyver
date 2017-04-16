@@ -29,36 +29,27 @@
 package io.macgyver.plugin.cloud.cloudstack;
 
 import java.io.IOException;
-import java.util.Iterator;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.joda.time.DateTime;
-import org.joda.time.format.DateTimeFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import okio.BufferedSink;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
-import com.squareup.okhttp.FormEncodingBuilder;
-import com.squareup.okhttp.MediaType;
-import com.squareup.okhttp.RequestBody;
 
-import io.macgyver.okrest.OkRestClient;
-import io.macgyver.okrest.OkRestException;
-import io.macgyver.okrest.OkRestLoggingInterceptor;
-import io.macgyver.okrest.OkRestResponse;
-import io.macgyver.okrest.OkRestTarget;
-import io.macgyver.okrest.OkRestWrapperException;
+import io.macgyver.okrest3.OkRestClient;
+import io.macgyver.okrest3.OkRestException;
+import io.macgyver.okrest3.OkRestResponse;
+import io.macgyver.okrest3.OkRestTarget;
+import io.macgyver.okrest3.OkRestWrapperException;
+import okhttp3.FormBody;
 
 public class CloudStackClientImpl implements CloudStackClient {
 
@@ -77,7 +68,7 @@ public class CloudStackClientImpl implements CloudStackClient {
 	OkRestTarget target;
 
 	public CloudStackClientImpl(String url) {
-		target = new OkRestClient().uri(url);
+		target = new OkRestClient.Builder().build().uri(url);
 		cache = CacheBuilder.newBuilder().expireAfterWrite(5, TimeUnit.MINUTES)
 				.build(new SessionKeyCacheLoader());
 	}
@@ -135,7 +126,7 @@ public class CloudStackClientImpl implements CloudStackClient {
 
 		try {
 			OkRestResponse rr = target
-					.post(new FormEncodingBuilder().add("username", username)
+					.post(new FormBody.Builder().add("username", username)
 							.add("password", password).add("response", "json")
 							.add("domain", "/").add("command", "login").build())
 					.execute();

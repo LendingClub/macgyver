@@ -36,12 +36,13 @@ import java.util.Map;
 import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
 import com.google.common.collect.Maps;
-import com.squareup.okhttp.mockwebserver.RecordedRequest;
+
+import okhttp3.mockwebserver.RecordedRequest;
 
 public class RequestUtil {
 
 	public static Map<String,String> parseFormBody(RecordedRequest rr) {
-		return parseFormBody(rr.getUtf8Body());
+		return parseFormBody(rr.getBody().readUtf8());
 	}
 	public static Map<String, String> parseFormBody(String body) {
 		return parseFormBody(body,"UTF8");

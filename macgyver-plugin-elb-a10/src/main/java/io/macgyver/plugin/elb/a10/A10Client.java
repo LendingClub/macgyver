@@ -34,7 +34,8 @@ import org.jdom2.Element;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.squareup.okhttp.Response;
+
+import okhttp3.Response;
 
 public interface A10Client {
 

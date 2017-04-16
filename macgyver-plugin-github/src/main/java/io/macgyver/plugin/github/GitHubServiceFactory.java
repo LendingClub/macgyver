@@ -29,28 +29,22 @@
 package io.macgyver.plugin.github;
 
 
-import io.macgyver.core.Kernel;
-import io.macgyver.core.service.BasicServiceFactory;
-import io.macgyver.core.service.ServiceDefinition;
-import io.macgyver.core.service.ServiceRegistry;
-import io.macgyver.okrest.BasicAuthInterceptor;
-import io.macgyver.okrest.OkRestClient;
-import io.macgyver.okrest.OkRestTarget;
-
 import java.io.IOException;
 import java.util.Properties;
 import java.util.Set;
 
 import org.kohsuke.github.GitHub;
 import org.kohsuke.github.GitHubBuilder;
-import org.kohsuke.github.extras.OkHttpConnector;
 import org.lendingclub.mercator.core.Projector;
 import org.lendingclub.mercator.github.GitHubScanner;
 import org.lendingclub.mercator.github.GitHubScannerBuilder;
 
 import com.google.common.base.Strings;
-import com.squareup.okhttp.OkHttpClient;
-import com.squareup.okhttp.OkUrlFactory;
+
+import io.macgyver.core.Kernel;
+import io.macgyver.core.service.BasicServiceFactory;
+import io.macgyver.core.service.ServiceDefinition;
+import io.macgyver.core.service.ServiceRegistry;
 
 public class GitHubServiceFactory extends BasicServiceFactory<GitHub> {
 
@@ -75,9 +69,7 @@ public class GitHubServiceFactory extends BasicServiceFactory<GitHub> {
 
 			GitHubBuilder builder = new GitHubBuilder();
 
-			builder = builder.withConnector(new OkHttpConnector(
-					new OkUrlFactory(new OkHttpClient())));
-
+		
 			GitHub gh = null;
 
 			if (url != null) {
@@ -108,7 +100,8 @@ public class GitHubServiceFactory extends BasicServiceFactory<GitHub> {
 	protected void doCreateCollaboratorInstances(ServiceRegistry registry,
 			ServiceDefinition primaryDefinition, Object primaryBean) {
 
-		OkHttpClient c = new OkHttpClient();
+		io.macgyver.okrest3.OkRestClient.Builder builder = new io.macgyver.okrest3.OkRestClient.Builder();
+		
 		GitHub h;
 
 		final String oauthToken = primaryDefinition.getProperties()
@@ -120,14 +113,14 @@ public class GitHubServiceFactory extends BasicServiceFactory<GitHub> {
 		String url = primaryDefinition.getProperties().getProperty("url");
 		if (!Strings.isNullOrEmpty(oauthToken)) {
 			logger.info("using oauth");
-			c.interceptors().add(
-					new BasicAuthInterceptor(oauthToken, "x-oauth-token"));
+			builder = builder.withBasicAuth(oauthToken, "x-oauth-token");
+			
 
 		} else if (!Strings.isNullOrEmpty(username)) {
 			logger.info("using username/password auth for OkRest client: "
 					+ username + "/" + password);
-			c.interceptors().add(new BasicAuthInterceptor(username, password));
-
+			builder = builder.withBasicAuth(username, password);
+		
 		} else {
 			logger.info("using anonymous auth");
 		}
@@ -135,7 +128,7 @@ public class GitHubServiceFactory extends BasicServiceFactory<GitHub> {
 		if (Strings.isNullOrEmpty(url)) {
 			url = "https://api.github.com";
 		}
-		OkRestTarget rest = new OkRestClient(c).url(url);
+		io.macgyver.okrest3.OkRestTarget rest = builder.build().url(url);
 
 		registry.registerCollaborator(primaryDefinition.getName() + "Api", rest);
 

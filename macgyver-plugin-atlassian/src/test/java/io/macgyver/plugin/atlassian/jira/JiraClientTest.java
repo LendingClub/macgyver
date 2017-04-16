@@ -38,11 +38,11 @@ import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.squareup.okhttp.mockwebserver.MockResponse;
-import com.squareup.okhttp.mockwebserver.MockWebServer;
-import com.squareup.okhttp.mockwebserver.RecordedRequest;
 
 import io.macgyver.core.util.StandaloneServiceBuilder;
+import okhttp3.mockwebserver.MockResponse;
+import okhttp3.mockwebserver.MockWebServer;
+import okhttp3.mockwebserver.RecordedRequest;
 
 public class JiraClientTest   {
 
@@ -68,7 +68,7 @@ public class JiraClientTest   {
 		// create a jira client that points to our mock server
 		JiraClient client = io.macgyver.core.util.StandaloneServiceBuilder
 				.forServiceFactory(JiraServiceFactory.class)
-				.property("url", mockServer.getUrl("/rest").toString())
+				.property("url", mockServer.url("/rest").toString())
 				.property("username", "JerryGarcia")
 				.property("password", "Ripple").build(JiraClient.class);
 
@@ -103,7 +103,7 @@ public class JiraClientTest   {
 	
 		
 		mockServer.enqueue(new MockResponse().setBody("{\"foo\":\"bar\"}"));
-		JiraClientImpl c = new JiraClientImpl(mockServer.getUrl("/rest").toExternalForm(), "username", "password");
+		JiraClientImpl c = new JiraClientImpl(mockServer.url("/rest").toString(), "username", "password");
 		
 		JsonNode n = c.getIssue("JIRA-999");
 		
@@ -129,7 +129,7 @@ public class JiraClientTest   {
 		// create a jira client that points to our mock server
 		JiraClient client = StandaloneServiceBuilder
 				.forServiceFactory(JiraServiceFactory.class)
-				.property("url", mockServer.getUrl("/rest").toString())
+				.property("url", mockServer.url("/rest").toString())
 				.property("username", "JerryGarcia")
 				.property("password", "Ripple").build(JiraClient.class);
 
@@ -160,7 +160,7 @@ public class JiraClientTest   {
 	public void testGetClient() {
 		JiraClient client = StandaloneServiceBuilder
 				.forServiceFactory(JiraServiceFactory.class)
-				.property("url", mockServer.getUrl("/rest").toString())
+				.property("url", mockServer.url("/rest").toString())
 				.property("username", "JerryGarcia")
 				.property("password", "Ripple").build(JiraClient.class);
 		

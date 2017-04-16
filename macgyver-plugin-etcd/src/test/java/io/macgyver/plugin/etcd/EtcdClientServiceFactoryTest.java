@@ -28,28 +28,27 @@
  */
 package io.macgyver.plugin.etcd;
 
-import io.macgyver.core.util.StandaloneServiceBuilder;
-import mousio.etcd4j.EtcdClient;
-
 import org.assertj.core.api.Assertions;
 import org.junit.Rule;
 import org.junit.Test;
 
-import com.squareup.okhttp.mockwebserver.MockResponse;
-import com.squareup.okhttp.mockwebserver.RecordedRequest;
-import com.squareup.okhttp.mockwebserver.MockWebServer;
+import io.macgyver.core.util.StandaloneServiceBuilder;
+import mousio.etcd4j.EtcdClient;
+import okhttp3.mockwebserver.MockResponse;
+import okhttp3.mockwebserver.MockWebServer;
+import okhttp3.mockwebserver.RecordedRequest;
 
 public class EtcdClientServiceFactoryTest {
 
 
 	@Rule
-	public MockWebServer mockServer = new MockWebServer();
+	public okhttp3.mockwebserver.MockWebServer mockServer = new MockWebServer();
 
 	@Test
 	public void testIt() throws Exception {
 
 
-		EtcdClient c= StandaloneServiceBuilder.forServiceFactory(EtcdClientServiceFactory.class).property("uri", mockServer.getUrl("/").toExternalForm()).build(EtcdClient.class);
+		EtcdClient c= StandaloneServiceBuilder.forServiceFactory(EtcdClientServiceFactory.class).property("uri", mockServer.url("/").toString()).build(EtcdClient.class);
 		Assertions.assertThat(mockServer).isNotNull();
 		mockServer.enqueue(new MockResponse().setBody("{}"));
 

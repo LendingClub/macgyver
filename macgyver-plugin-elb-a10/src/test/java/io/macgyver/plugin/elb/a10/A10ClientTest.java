@@ -29,13 +29,9 @@
 package io.macgyver.plugin.elb.a10;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import io.macgyver.core.LoggingConfig;
-import io.macgyver.test.RequestUtil;
 
 import java.io.IOException;
-import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
 import java.util.Map;
 
 import org.assertj.core.api.Assertions;
@@ -51,11 +47,13 @@ import org.junit.Test;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.collect.ImmutableMap;
-import com.squareup.okhttp.mockwebserver.MockResponse;
-import com.squareup.okhttp.mockwebserver.RecordedRequest;
-import com.squareup.okhttp.mockwebserver.MockWebServer;
+
+import io.macgyver.core.LoggingConfig;
+import io.macgyver.test.RequestUtil;
+import okhttp3.mockwebserver.MockResponse;
+import okhttp3.mockwebserver.MockWebServer;
+import okhttp3.mockwebserver.RecordedRequest;
 
 public class A10ClientTest {
 
@@ -76,7 +74,7 @@ public class A10ClientTest {
 		// Do not call it a mock client. It is a real client and a mock server!
 
 		// instantiate a test client that will communicate with our mock server
-		testClient = new A10ClientImpl(mockServer.getUrl("/services/rest/v2/")
+		testClient = new A10ClientImpl(mockServer.url("/services/rest/v2/")
 				.toString(), "dummyuser", "dummypassword");
 
 		// set the auth token to prevent the first call from being an

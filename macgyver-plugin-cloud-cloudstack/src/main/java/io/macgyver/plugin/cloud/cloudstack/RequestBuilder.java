@@ -28,13 +28,7 @@
  */
 package io.macgyver.plugin.cloud.cloudstack;
 
-import io.macgyver.core.MacGyverConfigurationException;
-import io.macgyver.core.MacGyverException;
-import io.macgyver.okrest.OkRestTarget;
-
-import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.Collections;
 import java.util.List;
@@ -44,10 +38,7 @@ import java.util.concurrent.ExecutionException;
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 
-import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
-
-import okio.Buffer;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.base.Joiner;
@@ -56,7 +47,9 @@ import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.io.BaseEncoding;
-import com.squareup.okhttp.FormEncodingBuilder;
+
+import io.macgyver.core.MacGyverException;
+import okhttp3.FormBody;
 
 public class RequestBuilder {
 
@@ -138,14 +131,14 @@ public class RequestBuilder {
 	public JsonNode execute() {
 
 		try {
-			OkRestTarget t = client.target;
+			io.macgyver.okrest3.OkRestTarget t = client.target;
 			param("response", "json");
 
 			String expires = DateTimeFormat.forPattern(
 					"yyyy-MM-dd'T'HH:mm:ssZZ").print(
 					System.currentTimeMillis() + 1000 * 60 * 5);
 			param("expires", expires);
-			FormEncodingBuilder b = new FormEncodingBuilder();
+			FormBody.Builder b = new FormBody.Builder();
 			for (Map.Entry<String, String> entry : paramMap.entrySet()) {
 				b = b.add(entry.getKey(), entry.getValue());
 

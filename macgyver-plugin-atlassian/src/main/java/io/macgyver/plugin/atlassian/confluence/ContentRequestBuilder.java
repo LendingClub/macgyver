@@ -28,9 +28,6 @@
  */
 package io.macgyver.plugin.atlassian.confluence;
 
-import io.macgyver.core.MacGyverException;
-import io.macgyver.okrest.OkRestResponse;
-
 import java.io.IOException;
 
 import org.slf4j.Logger;
@@ -39,6 +36,8 @@ import org.slf4j.LoggerFactory;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+
+import io.macgyver.core.MacGyverException;
 
 public class ContentRequestBuilder {
 
@@ -108,7 +107,7 @@ public class ContentRequestBuilder {
 				}
 				
 				
-				OkRestResponse response = client.getBaseTarget()
+				io.macgyver.okrest3.OkRestResponse response = client.getBaseTarget()
 						.path("content").path(id)
 						.contentType("application/json").put(updateRequest)
 						.execute();
@@ -137,9 +136,9 @@ public class ContentRequestBuilder {
 	public JsonNode search() {
 		if (title != null) {
 			return client.getBaseTarget().path("/content")
-					.queryParameter("title", title)
+					.queryParam("title", title)
 					.contentType("application/json")
-					.queryParameter("expand", expand).get()
+					.queryParam("expand", expand).get()
 					.execute(JsonNode.class);
 		}
 		throw new IllegalArgumentException();
@@ -150,7 +149,7 @@ public class ContentRequestBuilder {
 		if (id != null) {
 			return client.getBaseTarget().path("/content").path(id)
 					.contentType("application/json")
-					.queryParameter("expand", expand).get()
+					.queryParam("expand", expand).get()
 					.execute(JsonNode.class);
 		} else {
 			throw new IllegalArgumentException();

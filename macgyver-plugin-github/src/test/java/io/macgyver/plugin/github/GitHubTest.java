@@ -39,7 +39,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import io.macgyver.core.service.ServiceRegistry;
 import io.macgyver.core.util.StandaloneServiceBuilder;
-import io.macgyver.okrest.OkRestTarget;
+import io.macgyver.okrest3.OkRestTarget;
 import io.macgyver.test.MacGyverIntegrationTest;
 
 public class GitHubTest extends MacGyverIntegrationTest {
