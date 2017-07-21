@@ -33,7 +33,7 @@
         <p class="login-box-msg">MacGyver Login</p>
         <form action="/login" method="post">
           <div class="form-group has-feedback">
-            <input type="username" class="form-control" placeholder="Username" name="username">
+            <input type="username" class="form-control" placeholder="Username" name="username" autofocus="autofocus">
             <span class="glyphicon  form-control-feedback"></span>
           </div>
           <div class="form-group has-feedback">
